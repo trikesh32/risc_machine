@@ -16,6 +16,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "trikesh32"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/trikesh32/risc_machine.git",
+    "accountId": "790e5a60-080a-4c78-81bd-284a22ac007f"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -54,7 +66,7 @@
       <option name="presentableId" value="Default" />
       <updated>1748084192637</updated>
       <workItem from="1748084193670" duration="524000" />
-      <workItem from="1748084745274" duration="1002000" />
+      <workItem from="1748084745274" duration="12532000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -64,7 +76,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748084257327</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="ну, с богом">
+      <option name="closed" value="true" />
+      <created>1748085852330</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1748085852330</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

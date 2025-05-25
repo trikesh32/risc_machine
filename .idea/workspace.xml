@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="ну, с богом">
+    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="ну вроде про регистры и кодирование инструкций раскидал">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
@@ -16,18 +16,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "trikesh32"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;trikesh32&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/trikesh32/risc_machine.git",
-    "accountId": "790e5a60-080a-4c78-81bd-284a22ac007f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/trikesh32/risc_machine.git&quot;,
+    &quot;accountId&quot;: &quot;790e5a60-080a-4c78-81bd-284a22ac007f&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -66,7 +66,8 @@
       <option name="presentableId" value="Default" />
       <updated>1748084192637</updated>
       <workItem from="1748084193670" duration="524000" />
-      <workItem from="1748084745274" duration="12532000" />
+      <workItem from="1748084745274" duration="16649000" />
+      <workItem from="1748177329054" duration="2110000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -84,7 +85,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748085852330</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="ну вроде про регистры и кодирование инструкций раскидал">
+      <option name="closed" value="true" />
+      <created>1748118545085</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1748118545085</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -92,6 +101,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="ну, с богом" />
-    <option name="LAST_COMMIT_MESSAGE" value="ну, с богом" />
+    <MESSAGE value="ну вроде про регистры и кодирование инструкций раскидал" />
+    <option name="LAST_COMMIT_MESSAGE" value="ну вроде про регистры и кодирование инструкций раскидал" />
   </component>
 </project>

@@ -16,6 +16,8 @@ class DataPath:
     bus_b = None  # шина второго аргумента
     bus_res = None  # шина результата
     data_memory_module = None
+    alu = None
+    conditional_module = None
 
     def __init__(self, input_addr, output_addr, data_memory_size, input_buffer):
         self.zero = 0
@@ -29,6 +31,8 @@ class DataPath:
         self.sp = 0
         self.ar = 0
         self.data_memory_module = DataMemoryModule(input_addr, output_addr, data_memory_size, input_buffer)
+        self.alu = ALU()
+        self.conditional_module = ConditionalModule()
 
     def latch_zero(self):
         self.zero = 0

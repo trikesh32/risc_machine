@@ -237,4 +237,126 @@ def to_hex(code):
     return "\n".join(result)
 
 
+def from_bytes(input_file_name):
+    code = []
+    with open(input_file_name, "rb") as f:
+        while True:
+            bytes_data = f.read(4)
+            if len(bytes_data) != 4:
+                break
+            instruction = {}
+            word = int.from_bytes(bytes_data, "big")
+            opcode_bin = word >> 27
+            opcode = binary_to_opcode.get(opcode_bin)
+            arg1_bin = (word >> 23) & 0xF
+            arg2_bin = (word >> 19) & 0xF
+            arg3_bin = (word >> 15) & 0xF
+            k_short = to_signed(word & 0x7FFFF)
+            k_long = word & 0x7FFFFF
+            arg1 = binary_to_reg.get(arg1_bin)
+            arg2 = binary_to_reg.get(arg2_bin)
+            arg3 = binary_to_reg.get(arg2_bin)
+            instruction["opcode"] = opcode
+            if opcode == Opcode.LUI:
+                instruction["arg1"] = arg1
+                instruction["k"] = k_long
+            elif opcode == Opcode.MV:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+            elif opcode == Opcode.SW:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.LW:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.ADDI:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.ADD:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.SUB:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.MUL:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.MULH:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.DIV:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.REM:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.SLL:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.SRL:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.AND:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.OR:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.XOR:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["arg3"] = arg3
+            elif opcode == Opcode.J:
+                instruction["k"] = k_short
+            elif opcode == Opcode.JAL:
+                instruction["arg1"] = arg1
+                instruction["k"] = k_short
+            elif opcode == Opcode.JR:
+                instruction["arg1"] = arg1
+            elif opcode == Opcode.BLT:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.BLE:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.BGT:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.BGE:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.BNE:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == Opcode.BEQ:
+                instruction["arg1"] = arg1
+                instruction["arg2"] = arg2
+                instruction["k"] = k_short
+            elif opcode == opcode.HALT:
+                pass
+            code.append(instruction)
+    return code
+
+
+
+
+
 

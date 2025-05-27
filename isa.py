@@ -255,7 +255,7 @@ def from_bytes(input_file_name):
             k_long = word & 0x7FFFFF
             arg1 = binary_to_reg.get(arg1_bin)
             arg2 = binary_to_reg.get(arg2_bin)
-            arg3 = binary_to_reg.get(arg2_bin)
+            arg3 = binary_to_reg.get(arg3_bin)
             instruction["opcode"] = opcode
             if opcode == Opcode.LUI:
                 instruction["arg1"] = arg1

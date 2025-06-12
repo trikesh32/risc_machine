@@ -1,4 +1,4 @@
-from isa import Opcode, Register, reg_to_binary, binary_to_reg, opcode_to_binary, binary_to_opcode
+from isa import Opcode, Register, reg_to_binary, binary_to_reg, opcode_to_binary, binary_to_opcode, to_hex, to_signed
 
 
 class DataPath:
@@ -63,60 +63,6 @@ class DataPath:
 
     def latch_ar(self):
         self.ar = self.bus_res
-
-    def load_zero_on_bus_a(self):
-        self.bus_a = self.zero
-
-    def load_zero_on_bus_b(self):
-        self.bus_b = self.zero
-
-    def load_r0_on_bus_a(self):
-        self.bus_a = self.r0
-
-    def load_r0_on_bus_b(self):
-        self.bus_b = self.r0
-
-    def load_r1_on_bus_a(self):
-        self.bus_a = self.r1
-
-    def load_r1_on_bus_b(self):
-        self.bus_b = self.r1
-
-    def load_r2_on_bus_a(self):
-        self.bus_a = self.r2
-
-    def load_r2_on_bus_b(self):
-        self.bus_b = self.r2
-
-    def load_r3_on_bus_a(self):
-        self.bus_a = self.r3
-
-    def load_r3_on_bus_b(self):
-        self.bus_b = self.r3
-
-    def load_r4_on_bus_a(self):
-        self.bus_a = self.r4
-
-    def load_r4_on_bus_b(self):
-        self.bus_b = self.r4
-
-    def load_r5_on_bus_a(self):
-        self.bus_a = self.r5
-
-    def load_r5_on_bus_b(self):
-        self.bus_b = self.r5
-
-    def load_r6_on_bus_a(self):
-        self.bus_a = self.r6
-
-    def load_r6_on_bus_b(self):
-        self.bus_b = self.r6
-
-    def load_sp_on_bus_a(self):
-        self.bus_a = self.sp
-
-    def load_sp_on_bus_b(self):
-        self.bus_b = self.sp
 
     def alu_sum(self):
         self.bus_res = self.alu.sum(self.bus_a, self.bus_b)
@@ -202,33 +148,33 @@ class ControlUnit:
         self.data_path.bus_b = 23
         self.data_path.bus_a = self.program_register["k"]
         self.data_path.alu_shiftl()
-        getattr(self.data_path, f"latch_{self.program_register['arg1'].value}")()
+        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
         self.microcode_counter = 0x0
 
 
     def mv_microcode(self):
-        getattr(self.data_path, f"load_{self.program_register['arg2'].value}_on_bus_a")()
+        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
         self.data_path.load_zero_on_bus_b()
         self.data_path.alu_sum()
-        getattr(self.data_path, f"latch_{self.program_register['arg1'].value}")()
+        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
         self.microcode_counter = 0
 
     def sw_microcode_1(self):
-        getattr(self.data_path, f"load_{self.program_register['arg2'].value}_on_bus_a")()
+        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
         self.data_path.bus_b = self.program_register["k"]
         self.data_path.alu_sum()
         self.data_path.latch_ar()
         self.microcode_counter = 32
 
     def sw_microcode_2(self):
-        getattr(self.data_path, f"load_{self.program_register['arg1'].value}_on_bus_a")()
+        getattr(self.data_path, f"load_{self.program_register['rd'].value}_on_bus_a")()
         self.data_path.load_zero_on_bus_b()
         self.data_path.alu_sum()
         self.data_path.store_data_memory()
         self.microcode_counter = 0
 
     def lw_microcode_1(self):
-        getattr(self.data_path, f"load_{self.program_register['arg2'].value}_on_bus_a")()
+        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
         self.data_path.bus_b = self.program_register["k"]
         self.data_path.alu_sum()
         self.data_path.latch_ar()
@@ -236,7 +182,7 @@ class ControlUnit:
 
     def lw_microcode_2(self):
         self.data_path.load_data_memory()
-        getattr(self.data_path, f"latch_{self.program_register['arg1'].value}")()
+        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
         self.microcode_counter = 0
 
     def halt_microcode(self):
@@ -316,7 +262,7 @@ class ALU:
         return (a << b) & 0xFFFFFFFF
 
     def shiftr(self, a, b):
-        return (a >> b) & 0xFFFFFFFF
+        return (a & 0xFFFFFFFF >> b) & 0xFFFFFFFF
 
     def AND(self, a, b):
         return (a & b) & 0xFFFFFFFF
@@ -330,50 +276,61 @@ class ALU:
 
 class ConditionalModule:
     def eq(self, a, b):
-        return a == b
+        return to_signed(a) == to_signed(b)
 
     def ne(self, a, b):
-        return a != b
+        return to_signed(a) != to_signed(b)
 
     def lt(self, a, b):
-        return a < b
+        return to_signed(a) < to_signed(b)
 
     def le(self, a, b):
-        return a <= b
+        return to_signed(a) <= to_signed(b)
 
     def gt(self, a, b):
-        return a > b
+        return to_signed(a) > to_signed(b)
 
     def ge(self, a, b):
-        return a >= b
+        return to_signed(a) >= to_signed(b)
 
 
 code = [
     {
         "opcode": Opcode.LUI,
-        "arg1": Register.R0,
+        "rd": Register.R0,
+        "rs1": Register.NOT_USED,
+        "rs2": Register.NOT_USED,
         "k": 4
     },
     {
         "opcode": Opcode.MV,
-        "arg1": Register.R1,
-        "arg2": Register.R0
+        "rd": Register.R1,
+        "rs1": Register.R0,
+        "rs2": Register.NOT_USED,
+        "k": Register.NOT_USED
     },
     {
         "opcode": Opcode.LW,
-        "arg1": Register.R0,
-        "arg2": Register.ZERO,
+        "rd": Register.R0,
+        "rs1": Register.ZERO,
+        "rs2": Register.NOT_USED,
         "k": 0x80
     },
     {
         "opcode": Opcode.LW,
-        "arg1": Register.R1,
-        "arg2": Register.ZERO,
+        "rd": Register.R1,
+        "rs1": Register.ZERO,
+        "rs2": Register.NOT_USED,
         "k": 0x80
     },
     {
         "opcode": Opcode.HALT,
+        "rd": Register.NOT_USED,
+        "rs1": Register.NOT_USED,
+        "rs2": Register.NOT_USED,
+        "k": Register.NOT_USED
     }
 ]
-control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')])
-control_unit.run_microcode()
+# control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')])
+# control_unit.run_microcode()
+print(to_hex(code))

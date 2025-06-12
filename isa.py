@@ -16,16 +16,17 @@ class Opcode(str, Enum):
     REM = 'rem'
     SLL = 'sll'
     SRL = 'srl'
+    SRA = 'sra'
     AND = 'and'
     OR = 'or'
     XOR = 'xor'
     J = 'j'
     JAL = 'jal'
     JR = 'jr'
-    BLT = 'blt'
     BLE = 'ble'
+    BLEU = 'bleu'
     BGT = 'bgt'
-    BGE = 'bge'
+    BGTU = 'bgtu'
     BEQ = 'beq'
     BNE = 'bne'
     HALT = 'halt'
@@ -70,13 +71,14 @@ opcode_to_binary = {
     Opcode.J: 0x10,
     Opcode.JAL: 0x11,
     Opcode.JR: 0x12,
-    Opcode.BLT: 0x13,
-    Opcode.BLE: 0x14,
+    Opcode.BLE: 0x13,
+    Opcode.BLEU: 0x14,
     Opcode.BGT: 0x15,
-    Opcode.BGE: 0x16,
+    Opcode.BGTU: 0x16,
     Opcode.BEQ: 0x17,
     Opcode.BNE: 0x18,
-    Opcode.HALT: 0x19
+    Opcode.HALT: 0x19,
+    Opcode.SRA: 0x1A
 }
 
 binary_to_opcode = {
@@ -99,13 +101,14 @@ binary_to_opcode = {
     0x10: Opcode.J,
     0x11: Opcode.JAL,
     0x12: Opcode.JR,
-    0x13: Opcode.BLT,
-    0x14: Opcode.BLE,
+    0x13: Opcode.BLE,
+    0x14: Opcode.BLEU,
     0x15: Opcode.BGT,
-    0x16: Opcode.BGE,
+    0x16: Opcode.BGTU,
     0x17: Opcode.BEQ,
     0x18: Opcode.BNE,
-    0x19: Opcode.HALT
+    0x19: Opcode.HALT,
+    0x1A: Opcode.SRA
 }
 
 reg_to_binary = {
@@ -216,20 +219,22 @@ def to_hex(code):
             mnemonic = f"jal {rd}, {k}"
         elif opcode == Opcode.JR:
             mnemonic = f"jr {rs1}"
-        elif opcode == Opcode.BLT:
-            mnemonic = f"blt {rs1}, {rs2}, {k}"
+        elif opcode == Opcode.BLEU:
+            mnemonic = f"bleu {rs1}, {rs2}, {k}"
         elif opcode == Opcode.BLE:
             mnemonic = f"ble {rs1}, {rs2}, {k}"
         elif opcode == Opcode.BGT:
             mnemonic = f"bgt {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BGE:
-            mnemonic = f"bge {rs1}, {rs2}, {k}"
+        elif opcode == Opcode.BGTU:
+            mnemonic = f"bgtu {rs1}, {rs2}, {k}"
         elif opcode == Opcode.BNE:
             mnemonic = f"bne {rs1}, {rs2}, {k}"
         elif opcode == Opcode.BEQ:
             mnemonic = f"beq {rs1}, {rs2}, {k}"
         elif opcode == opcode.HALT:
             mnemonic = f"halt"
+        elif opcode == opcode.SRA:
+            mnemonic = f"sra {rd}, {rs1}, {rs2}"
         else:
             mnemonic = f"UNKNOWN_{opcode_bin:02X}"
 
@@ -331,7 +336,7 @@ def from_bytes(input_file_name):
                 instruction["k"] = k
             elif opcode == Opcode.JR:
                 instruction["rs1"] = rs1
-            elif opcode == Opcode.BLT:
+            elif opcode == Opcode.BLEU:
                 instruction["rs2"] = rs2
                 instruction["rs1"] = rs1
                 instruction["k"] = k
@@ -343,7 +348,7 @@ def from_bytes(input_file_name):
                 instruction["rs2"] = rs2
                 instruction["rs1"] = rs1
                 instruction["k"] = k
-            elif opcode == Opcode.BGE:
+            elif opcode == Opcode.BGTU:
                 instruction["rs2"] = rs2
                 instruction["rs1"] = rs1
                 instruction["k"] = k
@@ -357,5 +362,9 @@ def from_bytes(input_file_name):
                 instruction["k"] = k
             elif opcode == opcode.HALT:
                 pass
+            elif opcode == opcode.SRA:
+                instruction["rd"] = rd
+                instruction["rs1"] = rs1
+                instruction["rs2"] = rs2
             code.append(instruction)
     return code

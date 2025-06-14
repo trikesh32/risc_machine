@@ -1,4 +1,5 @@
 import opcode
+import pprint
 from enum import Enum
 
 
@@ -245,6 +246,7 @@ def to_hex(code):
 def from_bytes(input_file_name):
     code = []
     with open(input_file_name, "rb") as f:
+        first_instr_address = int.from_bytes(f.read(4), byteorder='little')
         while True:
             bytes_data = f.read(4)
             if len(bytes_data) != 4:
@@ -399,4 +401,8 @@ class Selects(int, Enum):
     SEL_B = 1
     SEL_C = 2
     SEL_D = 3
+
+
+if __name__ == "__main__":
+    pprint.pp(from_bytes("a.bin"))
 

@@ -593,57 +593,7 @@ class DataMemoryModule:
         self.data_memory[address + 3] = value_bytes[3]
 
 
-code = [
-    {
-        "opcode": Opcode.LUI,
-        "rd": Register.R0,
-        "rs1": Register.NOT_USED,
-        "rs2": Register.NOT_USED,
-        "k": 4
-    },
-    {
-        "opcode": Opcode.MV,
-        "rd": Register.R1,
-        "rs1": Register.R0,
-        "rs2": Register.NOT_USED,
-        "k": Register.NOT_USED
-    },
-    {
-        "opcode": Opcode.SW,
-        "rd": Register.NOT_USED,
-        "rs1": Register.ZERO,
-        "rs2": Register.R0,
-        "k": 0x84
-    },
-    {
-        "opcode": Opcode.LW,
-        "rd": Register.R1,
-        "rs1": Register.ZERO,
-        "rs2": Register.NOT_USED,
-        "k": 0x80
-    },
-    {
-        "opcode": Opcode.ADDI,
-        "rd": Register.R2,
-        "rs1": Register.R1,
-        "rs2": Register.NOT_USED,
-        "k": 5
-    },
-    {
-        "opcode": Opcode.MULH,
-        "rd": Register.R3,
-        "rs1": Register.R1,
-        "rs2": Register.R2,
-        "k": Register.NOT_USED
-    },
-    {
-        "opcode": Opcode.HALT,
-        "rd": Register.NOT_USED,
-        "rs1": Register.NOT_USED,
-        "rs2": Register.NOT_USED,
-        "k": Register.NOT_USED
-    }
-]
-control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')], LUT)
-control_unit.run_microcode()
-print(control_unit.data_path.data_memory_module.output_buffer)
+
+# control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')], LUT)
+# control_unit.run_microcode()
+# print(control_unit.data_path.data_memory_module.output_buffer)

@@ -4,49 +4,49 @@ from enum import Enum
 
 
 class Opcode(str, Enum):
-    LUI = 'lui'
-    MV = 'mv'
-    SW = 'sw'
-    LW = 'lw'
-    ADDI = 'addi'
-    ADD = 'add'
-    SUB = 'sub'
-    MUL = 'mul'
-    MULH = 'mulh'
-    DIV = 'div'
-    REM = 'rem'
-    SLL = 'sll'
-    SRL = 'srl'
-    SRA = 'sra'
-    AND = 'and'
-    OR = 'or'
-    XOR = 'xor'
-    J = 'j'
-    JAL = 'jal'
-    JR = 'jr'
-    BLE = 'ble'
-    BLEU = 'bleu'
-    BGT = 'bgt'
-    BGTU = 'bgtu'
-    BEQ = 'beq'
-    BNE = 'bne'
-    HALT = 'halt'
+    LUI = "lui"
+    MV = "mv"
+    SW = "sw"
+    LW = "lw"
+    ADDI = "addi"
+    ADD = "add"
+    SUB = "sub"
+    MUL = "mul"
+    MULH = "mulh"
+    DIV = "div"
+    REM = "rem"
+    SLL = "sll"
+    SRL = "srl"
+    SRA = "sra"
+    AND = "and"
+    OR = "or"
+    XOR = "xor"
+    J = "j"
+    JAL = "jal"
+    JR = "jr"
+    BLE = "ble"
+    BLEU = "bleu"
+    BGT = "bgt"
+    BGTU = "bgtu"
+    BEQ = "beq"
+    BNE = "bne"
+    HALT = "halt"
 
     def __str__(self):
         return str(self.value)
 
 
 class Register(str, Enum):
-    ZERO = 'zero'
-    R0 = 'r0'
-    R1 = 'r1'
-    R2 = 'r2'
-    R3 = 'r3'
-    R4 = 'r4'
-    R5 = 'r5'
-    R6 = 'r6'
-    SP = 'sp'
-    NOT_USED = 'not_used'
+    ZERO = "zero"
+    R0 = "r0"
+    R1 = "r1"
+    R2 = "r2"
+    R3 = "r3"
+    R4 = "r4"
+    R5 = "r5"
+    R6 = "r6"
+    SP = "sp"
+    NOT_USED = "not_used"
 
     def __str__(self):
         return str(self.value)
@@ -79,7 +79,7 @@ opcode_to_binary = {
     Opcode.BEQ: 0x17,
     Opcode.BNE: 0x18,
     Opcode.HALT: 0x19,
-    Opcode.SRA: 0x1A
+    Opcode.SRA: 0x1A,
 }
 
 binary_to_opcode = {
@@ -109,7 +109,7 @@ binary_to_opcode = {
     0x17: Opcode.BEQ,
     0x18: Opcode.BNE,
     0x19: Opcode.HALT,
-    0x1A: Opcode.SRA
+    0x1A: Opcode.SRA,
 }
 
 reg_to_binary = {
@@ -121,7 +121,7 @@ reg_to_binary = {
     Register.R4: 0x05,
     Register.R5: 0x06,
     Register.R6: 0x07,
-    Register.ZERO: 0x08
+    Register.ZERO: 0x08,
 }
 
 binary_to_reg = {
@@ -133,7 +133,7 @@ binary_to_reg = {
     0x05: Register.R4,
     0x06: Register.R5,
     0x07: Register.R6,
-    0x08: Register.ZERO
+    0x08: Register.ZERO,
 }
 
 
@@ -150,12 +150,9 @@ def to_bytes(code):
             binary_instr |= (reg_to_binary[instr["rs2"]]) << 16
         if instr["k"] != Register.NOT_USED:
             binary_instr |= instr["k"] & 0xFFFF
-        binary_bytes.extend([
-            (binary_instr >> 24) & 0xFF,
-            (binary_instr >> 16) & 0xFF,
-            (binary_instr >> 8) & 0xFF,
-            binary_instr & 0xFF
-        ])
+        binary_bytes.extend(
+            [(binary_instr >> 24) & 0xFF, (binary_instr >> 16) & 0xFF, (binary_instr >> 8) & 0xFF, binary_instr & 0xFF]
+        )
     return bytes(binary_bytes)
 
 
@@ -266,7 +263,7 @@ def from_bytes(input_file_name):
                 "rd": Register.NOT_USED,
                 "rs1": Register.NOT_USED,
                 "rs2": Register.NOT_USED,
-                "k": Register.NOT_USED
+                "k": Register.NOT_USED,
             }
             if opcode == Opcode.LUI:
                 instruction["rd"] = rd
@@ -385,6 +382,7 @@ class ALUModes(str, Enum):
     XOR = "XOR"
     SRA = "SRA"
 
+
 class CondModes(str, Enum):
     EQ = "EQ"
     NE = "NE"
@@ -395,11 +393,13 @@ class CondModes(str, Enum):
     TRUE = "TRUE"
     FALSE = "FALSE"
 
+
 class Selects(int, Enum):
     SEL_A = 0
     SEL_B = 1
     SEL_C = 2
     SEL_D = 3
+
 
 def get_data_dump(filename):
     res = []
@@ -410,4 +410,3 @@ def get_data_dump(filename):
                 break
             res.append(int.from_bytes(b, byteorder="little"))
     return res
-

@@ -4,18 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="все идет с молотка, когда кумарит армия">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/python.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/programs/input.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/programs/test.asm" afterDir="false" />
+    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="че-то еще с тестами">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/a.bin" beforeDir="false" afterPath="$PROJECT_DIR$/a.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/b.bin" beforeDir="false" afterPath="$PROJECT_DIR$/b.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/img/img.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/img.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/isa.py" beforeDir="false" afterPath="$PROJECT_DIR$/isa.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/machine.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translator.py" beforeDir="false" afterPath="$PROJECT_DIR$/translator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,7 +189,7 @@
       <workItem from="1749809437953" duration="7000" />
       <workItem from="1749819843072" duration="1000" />
       <workItem from="1749856780134" duration="13087000" />
-      <workItem from="1749872062433" duration="33476000" />
+      <workItem from="1749872062433" duration="33993000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -320,7 +311,31 @@
       <option name="project" value="LOCAL" />
       <updated>1749913138477</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="что-то пытаюсь с тестами сделать">
+      <option name="closed" value="true" />
+      <created>1749926096129</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1749926096129</updated>
+    </task>
+    <task id="LOCAL-00017" summary="лучше поздно чем никогда">
+      <option name="closed" value="true" />
+      <created>1749926136858</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1749926136858</updated>
+    </task>
+    <task id="LOCAL-00018" summary="че-то еще с тестами">
+      <option name="closed" value="true" />
+      <created>1749926331671</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1749926331671</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -344,7 +359,10 @@
     <MESSAGE value="на медленном завис весь батальон" />
     <MESSAGE value="гоним по венкам афганский бульон" />
     <MESSAGE value="все идет с молотка, когда кумарит армия" />
-    <option name="LAST_COMMIT_MESSAGE" value="все идет с молотка, когда кумарит армия" />
+    <MESSAGE value="что-то пытаюсь с тестами сделать" />
+    <MESSAGE value="лучше поздно чем никогда" />
+    <MESSAGE value="че-то еще с тестами" />
+    <option name="LAST_COMMIT_MESSAGE" value="че-то еще с тестами" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/risc_machine$isa.coverage" NAME="isa Coverage Results" MODIFIED="1749912720581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

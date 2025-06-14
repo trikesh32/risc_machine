@@ -55,9 +55,7 @@ def first_run(lines):
     global data_labels, text_labels, macros
     state = 0
     current_data_address = 0
-    current_text_address = 0
-    data_organized = False
-    program_organized = False
+    current_text_address = 4
     data_dump = {}
     text_dump = {}
     for line in lines:
@@ -73,18 +71,13 @@ def first_run(lines):
             state = 1
         elif line.startswith('.text') and state != 2:
             state = 2
-        elif line.startswith('.org') and state == 1 and not data_organized:
-            data_organized = True
+        elif line.startswith('.org') and state == 1:
             line = line.replace('.org', '').strip().split()
             if len(line) != 1:
                 raise Exception('invalid org definition')
             current_data_address = int(line[0], 0)
-        elif line.startswith('.org') and state == 2 and not program_organized:
-            program_organized = True
-            line = line.replace('.org', '').strip().split()
-            if len(line) != 1:
-                raise Exception('invalid org definition')
-            current_text_address = int(line[0], 0)
+        elif line.startswith('.org') and state == 2:
+            pass
         elif ':' in line:
             line = line.split(':')
             if state == 1:
@@ -229,9 +222,9 @@ if __name__ == "__main__":
     data_dump, text_dump = first_run(lines)
     text_dump = second_run(text_dump)
     text_dump = third_run(text_dump)
+    text_dump[0] = f"j {text_labels['_start'] - 4}"
     text_dump = fourth_run(text_dump)
     with open(sys.argv[2], 'wb+') as f:
-        f.write(text_labels['_start'].to_bytes(4, byteorder='little'))
         for i in range(max(text_dump.keys())+1):
             if i in text_dump.keys():
                 f.write(text_dump[i].to_bytes(1, byteorder='little'))

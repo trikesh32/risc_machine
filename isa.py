@@ -246,7 +246,6 @@ def to_hex(code):
 def from_bytes(input_file_name):
     code = []
     with open(input_file_name, "rb") as f:
-        first_instr_address = int.from_bytes(f.read(4), byteorder='little')
         while True:
             bytes_data = f.read(4)
             if len(bytes_data) != 4:
@@ -402,7 +401,13 @@ class Selects(int, Enum):
     SEL_C = 2
     SEL_D = 3
 
-
-if __name__ == "__main__":
-    pprint.pp(from_bytes("a.bin"))
+def get_data_dump(filename):
+    res = []
+    with open(filename, "rb") as f:
+        while True:
+            b = f.read(1)
+            if not b:
+                break
+            res.append(int.from_bytes(b, byteorder="little"))
+    return res
 

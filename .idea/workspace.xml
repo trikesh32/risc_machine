@@ -4,11 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="гоним по венкам афганский бульон">
-      <change afterPath="$PROJECT_DIR$/translator.py" afterDir="false" />
+    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="все идет с молотка, когда кумарит армия">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/python.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/programs/input.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/programs/test.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/a.bin" beforeDir="false" afterPath="$PROJECT_DIR$/a.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/b.bin" beforeDir="false" afterPath="$PROJECT_DIR$/b.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/img/img.png" beforeDir="false" afterPath="$PROJECT_DIR$/img/img.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/isa.py" beforeDir="false" afterPath="$PROJECT_DIR$/isa.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/machine.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translator.py" beforeDir="false" afterPath="$PROJECT_DIR$/translator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +81,7 @@
       <recent name="C:\Users\abobus\itmo\learning\comp_archetecture\risc_machine\img" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.isa">
+  <component name="RunManager" selected="Python.machine">
     <configuration name="isa" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="risc_machine" />
       <option name="ENV_FILES" value="" />
@@ -146,9 +153,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.machine" />
         <item itemvalue="Python.isa" />
         <item itemvalue="Python.translator" />
-        <item itemvalue="Python.machine" />
       </list>
     </recent_temporary>
   </component>
@@ -191,7 +198,7 @@
       <workItem from="1749809437953" duration="7000" />
       <workItem from="1749819843072" duration="1000" />
       <workItem from="1749856780134" duration="13087000" />
-      <workItem from="1749872062433" duration="21746000" />
+      <workItem from="1749872062433" duration="33476000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -305,7 +312,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749870312770</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="все идет с молотка, когда кумарит армия">
+      <option name="closed" value="true" />
+      <created>1749913138477</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1749913138477</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -328,11 +343,12 @@
     <MESSAGE value="вот теперь точно храпу выдать" />
     <MESSAGE value="на медленном завис весь батальон" />
     <MESSAGE value="гоним по венкам афганский бульон" />
-    <option name="LAST_COMMIT_MESSAGE" value="гоним по венкам афганский бульон" />
+    <MESSAGE value="все идет с молотка, когда кумарит армия" />
+    <option name="LAST_COMMIT_MESSAGE" value="все идет с молотка, когда кумарит армия" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/risc_machine$isa.coverage" NAME="isa Coverage Results" MODIFIED="1749912720581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/risc_machine$translator.coverage" NAME="translator Coverage Results" MODIFIED="1749912180885" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/risc_machine$machine.coverage" NAME="machine Coverage Results" MODIFIED="1749868045460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/risc_machine$machine.coverage" NAME="machine Coverage Results" MODIFIED="1749925589654" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

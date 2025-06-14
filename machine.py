@@ -1,5 +1,7 @@
+import sys
+
 from isa import Opcode, Register, reg_to_binary, binary_to_reg, opcode_to_binary, binary_to_opcode, to_hex, to_signed16, \
-    ALUModes, CondModes, Selects
+    ALUModes, CondModes, Selects, from_bytes, get_data_dump
 
 
 class DataPath:
@@ -138,8 +140,7 @@ class DataPath:
             self.op2_mux = self.imm
 
     def __str__(self):
-        s = f"""r0 = {self.r0}. r1 = {self.r1}. r2 = {self.r2}. r3 = {self.r3}. r4 = {self.r4}. r5 = {self.r6}. 
-        """
+        s = f"r0: {self.r0}. r1: {self.r1}. r2: {self.r2}. r3: {self.r3}. r4: {self.r4}. r5: {self.r5}, r6: {self.r6}, sp: {self.sp}, ar: {self.ar}"
         return s
 
 
@@ -186,29 +187,38 @@ class ControlUnit:
         if self.data_path.cond(mode):
             self.pc_mux = self.data_path.res
         else:
-            self.pc_mux = self.program_counter + 4
+            self.pc_mux = self.program_counter
 
     def latch_pr(self):
         self.program_register = self.program_memory[self.program_counter // 4]
 
+    def debug_output(self, microcode_name):
+        s = f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path)
+        print(s)
 
     def run_microcode(self):
         while not self.halted:
             self.tick += 1
             self.microcode_reg = self.microcode_memory[self.microcode_counter]
-            self.microcode_reg(self)
-            print(self.data_path)
+            microcode_name = self.microcode_reg(self)
+            self.debug_output(microcode_name)
 
     def fetch_command(self):
         self.latch_pr()
-        self.pc_mux_sel(CondModes.FALSE)
+        self.data_path.mc_const = 4
+        self.data_path.op1_sig(Selects.SEL_B)
+        self.data_path.op2_sig(Selects.SEL_C)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.TRUE)
         self.latch_pc()
         self.m_signal(Selects.SEL_A)
         self.data_path.imm = self.program_register['k']
         self.data_path.pc = self.program_counter
+        return "FETCH"
 
     def decode_command(self):
         self.m_signal(Selects.SEL_B)
+        return "DECODE"
 
 
     def lui_microcode(self):
@@ -219,6 +229,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "LUI"
 
     def mv_microcode(self):
         self.data_path.mc_const = 0
@@ -229,6 +240,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "MV"
 
     def sw_microcode_1(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -237,6 +249,7 @@ class ControlUnit:
         self.data_path.alu(ALUModes.ADD)
         self.data_path.latch_ar()
         self.m_signal(Selects.SEL_A)
+        return "SW_1"
 
     def sw_microcode_2(self):
         self.data_path.mc_const = 0
@@ -246,6 +259,7 @@ class ControlUnit:
         self.data_path.alu(ALUModes.ADD)
         self.data_path.write()
         self.m_signal(Selects.SEL_C)
+        return "SW_2"
 
     def lw_microcode_1(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -254,14 +268,17 @@ class ControlUnit:
         self.data_path.alu(ALUModes.ADD)
         self.data_path.latch_ar()
         self.m_signal(Selects.SEL_A)
+        return "LW_1"
 
     def lw_microcode_2(self):
         self.data_path.read(Selects.SEL_B)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "LW_2"
 
     def halt_microcode(self):
         self.halted = True
+        return "HALT"
 
     def addi_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -271,6 +288,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "ADDI"
 
     def add_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -281,6 +299,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "ADD"
 
     def sub_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -291,6 +310,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "SUB"
 
     def mul_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -301,6 +321,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "MUL"
 
     def mulh_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -311,6 +332,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "MULH"
 
     def div_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -321,6 +343,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "DIV"
 
     def rem_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -331,6 +354,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "REM"
 
     def sll_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -341,6 +365,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "SLL"
 
     def srl_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -351,6 +376,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "SRL"
 
     def sra_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -361,6 +387,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "SRA"
 
     def and_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -371,6 +398,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "AND"
 
     def or_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -381,6 +409,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "OR"
 
     def xor_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -391,6 +420,7 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_C)
+        return "XOR"
 
     def jal_microcode(self):
         self.data_path.mc_const = 0
@@ -400,6 +430,8 @@ class ControlUnit:
         self.data_path.read(Selects.SEL_A)
         self.data_path.latch_file(self.program_register['rd'])
         self.m_signal(Selects.SEL_A)
+        self.data_path.pc = self.program_counter
+        return "JAL"
 
     def j_microcode(self):
         self.data_path.op1_sig(Selects.SEL_C)
@@ -408,6 +440,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.TRUE)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "J"
 
     def jr_microcode(self):
         self.data_path.mc_const = 0
@@ -418,6 +452,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.TRUE)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "JR"
 
     def bgt_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -428,6 +464,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.GT)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BGT"
 
     def bgtu_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -438,6 +476,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.GTU)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BGTU"
 
     def ble_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -448,6 +488,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.LE)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BLE"
 
     def bleu_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -458,6 +500,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.LEU)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BLEU"
 
     def beq_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -468,6 +512,9 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.EQ)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BEQ"
+
 
     def bne_microcode(self):
         self.data_path.rs1(self.program_register['rs1'])
@@ -478,6 +525,8 @@ class ControlUnit:
         self.pc_mux_sel(CondModes.NE)
         self.latch_pc()
         self.m_signal(Selects.SEL_C)
+        self.data_path.pc = self.program_counter
+        return "BNE"
 
 
 
@@ -592,8 +641,24 @@ class DataMemoryModule:
         self.data_memory[address + 2] = value_bytes[2]
         self.data_memory[address + 3] = value_bytes[3]
 
+    def load_dump(self, data_dump):
+        for i in range(len(data_dump)):
+            self.data_memory[i] = data_dump[i]
 
 
-# control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')], LUT)
-# control_unit.run_microcode()
-# print(control_unit.data_path.data_memory_module.output_buffer)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Использование: python machine.py <program_dump> <data_dump> <input_file> <input_fmt> (num | str)")
+        exit(1)
+    if sys.argv[4] == "num":
+        input_buffer = list(map(int, open(sys.argv[3]).readlines()))
+    else:
+        input_buffer = list(map(ord, open(sys.argv[3]).readline()))
+        input_buffer[-1] = 0
+    code = from_bytes(sys.argv[1])
+    control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 1024, input_buffer, LUT)
+    control_unit.data_path.data_memory_module.load_dump(get_data_dump(sys.argv[2]))
+    control_unit.run_microcode()
+    print(control_unit.data_path.data_memory_module.output_buffer)
+    print("".join(map(chr, control_unit.data_path.data_memory_module.output_buffer)))

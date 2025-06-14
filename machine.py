@@ -417,7 +417,67 @@ class ControlUnit:
         self.data_path.alu(ALUModes.ADD)
         self.pc_mux_sel(CondModes.TRUE)
         self.latch_pc()
+        self.m_signal(Selects.SEL_C)
 
+    def bgt_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.GT)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def bgtu_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.GTU)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def ble_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.LE)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def bleu_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.LEU)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def beq_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.EQ)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def bne_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.NE)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
 
 
 
@@ -448,6 +508,12 @@ microcode_memory = {
     22: ControlUnit.jal_microcode,
     23: ControlUnit.j_microcode,
     24: ControlUnit.jr_microcode,
+    25: ControlUnit.bgt_microcode,
+    26: ControlUnit.bgtu_microcode,
+    27: ControlUnit.ble_microcode,
+    28: ControlUnit.bleu_microcode,
+    29: ControlUnit.beq_microcode,
+    30: ControlUnit.bne_microcode,
 }
 
 LUT = {
@@ -472,6 +538,12 @@ LUT = {
     Opcode.JAL: 22,
     Opcode.J: 23,
     Opcode.JR: 24,
+    Opcode.BGT: 25,
+    Opcode.BGTU: 26,
+    Opcode.BLE: 27,
+    Opcode.BLEU: 28,
+    Opcode.BEQ: 29,
+    Opcode.BNE: 30,
 }
 
 class DataMemoryModule:

@@ -1,4 +1,5 @@
-from isa import Opcode, Register, reg_to_binary, binary_to_reg, opcode_to_binary, binary_to_opcode, to_hex, to_signed
+from isa import Opcode, Register, reg_to_binary, binary_to_reg, opcode_to_binary, binary_to_opcode, to_hex, to_signed16, \
+    ALUModes, CondModes, Selects
 
 
 class DataPath:
@@ -12,12 +13,7 @@ class DataPath:
     r6 = None  # инициализируется нулем
     sp = None  # инициализируется нулем
     ar = None  # инициализируется нулем
-    bus_a = None  # шина первого аргумента
-    bus_b = None  # шина второго аргумента
-    bus_res = None  # шина результата
     data_memory_module = None
-    alu = None
-    conditional_module = None
 
     def __init__(self, input_addr, output_addr, data_memory_size, input_buffer):
         self.zero = 0
@@ -31,77 +27,115 @@ class DataPath:
         self.sp = 0
         self.ar = 0
         self.data_memory_module = DataMemoryModule(input_addr, output_addr, data_memory_size, input_buffer)
-        self.alu = ALU()
-        self.conditional_module = ConditionalModule()
+        # далее это не регистры, это провода и мультиплексоры
+        self.res = 0
+        self.file_mux = 0
+        self.rs1_mux = 0
+        self.rs2_mux = 0
+        self.op1_mux = 0
+        self.op2_mux = 0
+        self.imm = 0
+        self.mc_const = 0
+        self.pc = 0
 
-    def latch_zero(self):
-        self.zero = 0
+    def alu(self, mode):
+        a = self.op1_mux
+        b = self.op2_mux
+        if mode == ALUModes.ADD:
+            self.res = (a + b) & 0xFFFFFFFF
+        elif mode == ALUModes.SUB:
+            self.res =  (a - b) & 0xFFFFFFFF
+        elif mode == ALUModes.MUL:
+            self.res =  (a * b) & 0xFFFFFFFF
+        elif mode == ALUModes.MULH:
+            self.res =  ((a * b) & 0xFFFFFFFF00000000) >> 32
+        elif mode == ALUModes.DIV:
+            self.res =  (a // b) & 0xFFFFFFFF
+        elif mode == ALUModes.REM:
+            self.res = (a % b) & 0xFFFFFFFF
+        elif mode == ALUModes.SLL:
+            self.res =  (a << b) & 0xFFFFFFFF
+        elif mode == ALUModes.SRL:
+            self.res =  (a & 0xFFFFFFFF >> b) & 0xFFFFFFFF
+        elif mode == ALUModes.AND:
+            self.res =  (a & b) & 0xFFFFFFFF
+        elif mode == ALUModes.OR:
+            self.res =  (a | b) & 0xFFFFFFFF
+        elif mode == ALUModes.XOR:
+            self.res =  (a ^ b) & 0xFFFFFFFF
+        elif mode == ALUModes.SRA:
+            self.res =  (a >> b) & 0xFFFFFFFF
+        else:
+            self.res = 0
 
-    def latch_r0(self):
-        self.r0 = self.bus_res
+    def cond(self, mode):
+        a = self.rs1_mux
+        b = self.rs2_mux
+        if mode == CondModes.EQ:
+            return to_signed16(a) == to_signed16(b)
+        elif mode == CondModes.NE:
+            return to_signed16(a) != to_signed16(b)
+        elif mode == CondModes.LE:
+            return to_signed16(a) <= to_signed16(b)
+        elif mode == CondModes.LEU:
+            return a <= b
+        elif mode == CondModes.GT:
+            return to_signed16(a) > to_signed16(b)
+        elif mode == CondModes.GTU:
+            return a > b
+        elif mode == CondModes.TRUE:
+            return True
+        elif mode == CondModes.FALSE:
+            return False
+        else:
+            return None
 
-    def latch_r1(self):
-        self.r1 = self.bus_res
+    def latch_file(self, rd):
+        setattr(self, rd.value, self.file_mux)
 
-    def latch_r2(self):
-        self.r2 = self.bus_res
+    def read(self, sel):
+        if sel.value == 0:
+            self.file_mux = self.res
+        if sel.value == 1:
+            self.file_mux = self.data_memory_module.read_word(self.ar)
 
-    def latch_r3(self):
-        self.r3 = self.bus_res
-
-    def latch_r4(self):
-        self.r4 = self.bus_res
-
-    def latch_r5(self):
-        self.r5 = self.bus_res
-
-    def latch_r6(self):
-        self.r6 = self.bus_res
-
-    def latch_sp(self):
-        self.sp = self.bus_res
+    def write(self):
+        self.data_memory_module.write_word(self.ar, self.res)
 
     def latch_ar(self):
-        self.ar = self.bus_res
+        self.ar = self.res
 
-    def alu_sum(self):
-        self.bus_res = self.alu.sum(self.bus_a, self.bus_b)
+    def rs1(self, sel):
+        if sel == Register.NOT_USED:
+            self.rs1_mux = self.zero
+        else:
+            self.rs1_mux = getattr(self, sel.value)
 
-    def alu_sub(self):
-        self.bus_res = self.alu.sub(self.bus_a, self.bus_b)
+    def rs2(self, sel):
+        if sel == Register.NOT_USED:
+            self.rs2_mux = self.zero
+        else:
+            self.rs2_mux = getattr(self, sel.value)
 
-    def alu_mul(self):
-        self.bus_res = self.alu.mul(self.bus_a, self.bus_b)
+    def op1_sig(self, sel):
+        if sel.value == 0:
+            self.op1_mux = self.rs1_mux
+        if sel.value == 1:
+            self.op1_mux = self.mc_const
+        if sel.value == 2:
+            self.op1_mux = self.pc
+        if sel.value == 3:
+            self.op1_mux = self.imm
 
-    def alu_mulh(self):
-        self.bus_res = self.alu.mulh(self.bus_a, self.bus_b)
-
-    def alu_div(self):
-        self.bus_res = self.alu.div(self.bus_a, self.bus_b)
-
-    def alu_mod(self):
-        self.bus_res = self.alu.mod(self.bus_a, self.bus_b)
-
-    def alu_shiftl(self):
-        self.bus_res = self.alu.shiftl(self.bus_a, self.bus_b)
-
-    def alu_shiftr(self):
-        self.bus_res = self.alu.shiftr(self.bus_a, self.bus_b)
-
-    def alu_AND(self):
-        self.bus_res = self.alu.AND(self.bus_a, self.bus_b)
-
-    def alu_OR(self):
-        self.bus_res = self.alu.OR(self.bus_a, self.bus_b)
-
-    def alu_XOR(self):
-        self.bus_res = self.alu.XOR(self.bus_a, self.bus_b)
-
-    def load_data_memory(self):
-        self.bus_res = self.data_memory_module.read_word(self.ar)
-
-    def store_data_memory(self):
-        self.data_memory_module.write_word(self.ar, self.bus_res)
+    def op2_sig(self, sel):
+        if sel.value == 0:
+            self.op2_mux = self.rs2_mux
+        if sel.value == 1:
+            self.op2_mux = self.mc_const
+        if sel.value == 2:
+            self.op2_mux = self.pc
+        if sel.value == 3:
+            self.op2_mux = self.imm
 
     def __str__(self):
         s = f"""r0 = {self.r0}. r1 = {self.r1}. r2 = {self.r2}. r3 = {self.r3}. r4 = {self.r4}. r5 = {self.r6}. 
@@ -119,9 +153,10 @@ class ControlUnit:
     program_register = None
     data_path = None
     halted = None # инициализируется False
+    LUT = None # инициализируется входными данными конструктора
 
 
-    def __init__(self, microcode_memory, program, input_addr, output_addr, data_memory_size, input_buffer):
+    def __init__(self, microcode_memory, program, input_addr, output_addr, data_memory_size, input_buffer, LUT):
         self.program_counter = 0
         self.program_memory = program
         self.tick = 0
@@ -130,7 +165,32 @@ class ControlUnit:
         self.program_register = None
         self.data_path = DataPath(input_addr, output_addr, data_memory_size, input_buffer)
         self.microcode_memory = microcode_memory
+        self.LUT = LUT
         self.halted = False
+        # мультиплексоры
+        self.pc_mux = 0
+        self.mc_mux = 0
+
+    def m_signal(self, sel):
+        if sel.value == 0:
+            self.microcode_counter = self.microcode_counter + 1
+        if sel.value == 1:
+            self.microcode_counter = self.LUT[self.program_register['opcode']]
+        if sel.value == 2:
+            self.microcode_counter = 0
+
+    def latch_pc(self):
+        self.program_counter = self.pc_mux
+
+    def pc_mux_sel(self, mode):
+        if self.data_path.cond(mode):
+            self.pc_mux = self.data_path.res
+        else:
+            self.pc_mux = self.program_counter + 4
+
+    def latch_pr(self):
+        self.program_register = self.program_memory[self.program_counter // 4]
+
 
     def run_microcode(self):
         while not self.halted:
@@ -140,65 +200,279 @@ class ControlUnit:
             print(self.data_path)
 
     def fetch_command(self):
-        self.program_register = self.program_memory[self.program_counter]
-        self.program_counter += 1
-        self.microcode_counter = opcode_to_binary[self.program_register["opcode"]] + 1
+        self.latch_pr()
+        self.pc_mux_sel(CondModes.FALSE)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_A)
+        self.data_path.imm = self.program_register['k']
+        self.data_path.pc = self.program_counter
+
+    def decode_command(self):
+        self.m_signal(Selects.SEL_B)
+
 
     def lui_microcode(self):
-        self.data_path.bus_b = 23
-        self.data_path.bus_a = self.program_register["k"]
-        self.data_path.alu_shiftl()
-        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
-        self.microcode_counter = 0x0
-
+        self.data_path.mc_const = 16
+        self.data_path.op1_sig(Selects.SEL_D)
+        self.data_path.op2_sig(Selects.SEL_B)
+        self.data_path.alu(ALUModes.SLL)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
 
     def mv_microcode(self):
-        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
-        self.data_path.load_zero_on_bus_b()
-        self.data_path.alu_sum()
-        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
-        self.microcode_counter = 0
+        self.data_path.mc_const = 0
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_B)
+        self.data_path.alu(ALUModes.ADD)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
 
     def sw_microcode_1(self):
-        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
-        self.data_path.bus_b = self.program_register["k"]
-        self.data_path.alu_sum()
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
         self.data_path.latch_ar()
-        self.microcode_counter = 32
+        self.m_signal(Selects.SEL_A)
 
     def sw_microcode_2(self):
-        getattr(self.data_path, f"load_{self.program_register['rd'].value}_on_bus_a")()
-        self.data_path.load_zero_on_bus_b()
-        self.data_path.alu_sum()
-        self.data_path.store_data_memory()
-        self.microcode_counter = 0
+        self.data_path.mc_const = 0
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_B)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.ADD)
+        self.data_path.write()
+        self.m_signal(Selects.SEL_C)
 
     def lw_microcode_1(self):
-        getattr(self.data_path, f"load_{self.program_register['rs1'].value}_on_bus_a")()
-        self.data_path.bus_b = self.program_register["k"]
-        self.data_path.alu_sum()
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
         self.data_path.latch_ar()
-        self.microcode_counter = 33
+        self.m_signal(Selects.SEL_A)
 
     def lw_microcode_2(self):
-        self.data_path.load_data_memory()
-        getattr(self.data_path, f"latch_{self.program_register['rd'].value}")()
-        self.microcode_counter = 0
+        self.data_path.read(Selects.SEL_B)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
 
     def halt_microcode(self):
         self.halted = True
 
+    def addi_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def add_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.ADD)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def sub_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.SUB)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def mul_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.MUL)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def mulh_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.MULH)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def div_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.DIV)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def rem_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.REM)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def sll_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.SLL)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def srl_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.SRL)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def sra_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.SRA)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def and_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.AND)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def or_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.OR)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def xor_microcode(self):
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.rs2(self.program_register['rs2'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_A)
+        self.data_path.alu(ALUModes.XOR)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_C)
+
+    def jal_microcode(self):
+        self.data_path.mc_const = 0
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_B)
+        self.data_path.alu(ALUModes.ADD)
+        self.data_path.read(Selects.SEL_A)
+        self.data_path.latch_file(self.program_register['rd'])
+        self.m_signal(Selects.SEL_A)
+
+    def j_microcode(self):
+        self.data_path.op1_sig(Selects.SEL_C)
+        self.data_path.op2_sig(Selects.SEL_D)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.TRUE)
+        self.latch_pc()
+        self.m_signal(Selects.SEL_C)
+
+    def jr_microcode(self):
+        self.data_path.mc_const = 0
+        self.data_path.rs1(self.program_register['rs1'])
+        self.data_path.op1_sig(Selects.SEL_A)
+        self.data_path.op2_sig(Selects.SEL_B)
+        self.data_path.alu(ALUModes.ADD)
+        self.pc_mux_sel(CondModes.TRUE)
+        self.latch_pc()
+
+
+
+
+
 microcode_memory = {
     0: ControlUnit.fetch_command,
-    1: ControlUnit.lui_microcode,
-    2: ControlUnit.mv_microcode,
-    3: ControlUnit.sw_microcode_1,
-    4: ControlUnit.lw_microcode_1,
-    26: ControlUnit.halt_microcode,
-    32: ControlUnit.sw_microcode_2,
-    33: ControlUnit.lw_microcode_2
+    1: ControlUnit.decode_command,
+    2: ControlUnit.lui_microcode,
+    3: ControlUnit.halt_microcode,
+    4: ControlUnit.mv_microcode,
+    5: ControlUnit.sw_microcode_1,
+    6: ControlUnit.sw_microcode_2,
+    7: ControlUnit.lw_microcode_1,
+    8: ControlUnit.lw_microcode_2,
+    9: ControlUnit.addi_microcode,
+    10: ControlUnit.add_microcode,
+    11: ControlUnit.sub_microcode,
+    12: ControlUnit.mul_microcode,
+    13: ControlUnit.mulh_microcode,
+    14: ControlUnit.div_microcode,
+    15: ControlUnit.rem_microcode,
+    16: ControlUnit.sll_microcode,
+    17: ControlUnit.srl_microcode,
+    18: ControlUnit.sra_microcode,
+    19: ControlUnit.and_microcode,
+    20: ControlUnit.or_microcode,
+    21: ControlUnit.xor_microcode,
+    22: ControlUnit.jal_microcode,
+    23: ControlUnit.j_microcode,
+    24: ControlUnit.jr_microcode,
 }
 
+LUT = {
+    Opcode.LUI: 2,
+    Opcode.HALT: 3,
+    Opcode.MV: 4,
+    Opcode.SW: 5,
+    Opcode.LW: 7,
+    Opcode.ADDI: 9,
+    Opcode.ADD: 10,
+    Opcode.SUB: 11,
+    Opcode.MUL: 12,
+    Opcode.MULH: 13,
+    Opcode.DIV: 14,
+    Opcode.REM: 15,
+    Opcode.SLL: 16,
+    Opcode.SRL: 17,
+    Opcode.SRA: 18,
+    Opcode.AND: 19,
+    Opcode.OR: 20,
+    Opcode.XOR: 21,
+    Opcode.JAL: 22,
+    Opcode.J: 23,
+    Opcode.JR: 24,
+}
 
 class DataMemoryModule:
     input_addr = None
@@ -218,7 +492,9 @@ class DataMemoryModule:
         self.output_buffer = []
 
     def read_word(self, address):
-        assert address != self.output_addr, "Невозможно считать данные из буфера вывода!"
+        assert address <= self.output_addr - 4 or address >= self.output_addr + 4, "Невозможно считать данные из буфера вывода!"
+        assert address <= self.input_addr - 4 or address == self.input_addr or address >= self.input_addr + 4, "Кривое обращение по адресу ввода!"
+        assert address <= self.data_memory_size - 4, "Выход за пределы памяти!"
         if address == self.input_addr:
             assert len(self.input_buffer) != 0, "Буфер ввода пустой!"
             res = int.from_bytes((self.input_buffer[0].to_bytes(4, byteorder="little")), "little")
@@ -227,71 +503,22 @@ class DataMemoryModule:
         a = self.data_memory[address]
         b = self.data_memory[address + 1]
         c = self.data_memory[address + 2]
-        d = self.data_memory[address + 3] # TODO разобраться с блядскими restricted zones
+        d = self.data_memory[address + 3]
         res = (d << 24) | (c << 16) | (b << 8) | a
         return res
 
     def write_word(self, address, value):
-        assert address != self.input_addr, "Невозможно записать данные в буфер ввода!"
+        assert address <= self.input_addr - 4 or address >= self.input_addr + 4, "Невозможно записать данные в буфер ввода!"
+        assert address <= self.output_addr - 4 or address == self.output_addr or address >= self.output_addr + 4, "Кривое обращение по адресу вывода!"
+        assert address <= self.data_memory_size - 4, "Выход за пределы памяти!"
         if address == self.output_addr:
             self.output_buffer.append(value)
             return
-        self.data_memory[address] = value
-
-
-class ALU:
-    def sum(self, a, b):
-        return (a + b) & 0xFFFFFFFF
-
-    def sub(self, a, b):
-        return (a - b) & 0xFFFFFFFF
-
-    def mul(self, a, b):
-        return (a * b) & 0xFFFFFFFF
-
-    def mulh(self, a, b):
-        return ((a * b) & 0xFFFFFFFF00000000) >> 32
-
-    def div(self, a, b):
-        return (a / b) & 0xFFFFFFFF
-
-    def mod(self, a, b):
-        return (a % b) & 0xFFFFFFFF
-
-    def shiftl(self, a, b):
-        return (a << b) & 0xFFFFFFFF
-
-    def shiftr(self, a, b):
-        return (a & 0xFFFFFFFF >> b) & 0xFFFFFFFF
-
-    def AND(self, a, b):
-        return (a & b) & 0xFFFFFFFF
-
-    def OR(self, a, b):
-        return (a | b) & 0xFFFFFFFF
-
-    def XOR(self, a, b):
-        return (a ^ b) & 0xFFFFFFFF
-
-
-class ConditionalModule:
-    def eq(self, a, b):
-        return to_signed(a) == to_signed(b)
-
-    def ne(self, a, b):
-        return to_signed(a) != to_signed(b)
-
-    def lt(self, a, b):
-        return to_signed(a) < to_signed(b)
-
-    def le(self, a, b):
-        return to_signed(a) <= to_signed(b)
-
-    def gt(self, a, b):
-        return to_signed(a) > to_signed(b)
-
-    def ge(self, a, b):
-        return to_signed(a) >= to_signed(b)
+        value_bytes  = value.to_bytes(4, byteorder="little")
+        self.data_memory[address] = value_bytes[0]
+        self.data_memory[address + 1] = value_bytes[1]
+        self.data_memory[address + 2] = value_bytes[2]
+        self.data_memory[address + 3] = value_bytes[3]
 
 
 code = [
@@ -310,11 +537,11 @@ code = [
         "k": Register.NOT_USED
     },
     {
-        "opcode": Opcode.LW,
-        "rd": Register.R0,
+        "opcode": Opcode.SW,
+        "rd": Register.NOT_USED,
         "rs1": Register.ZERO,
-        "rs2": Register.NOT_USED,
-        "k": 0x80
+        "rs2": Register.R0,
+        "k": 0x84
     },
     {
         "opcode": Opcode.LW,
@@ -324,6 +551,20 @@ code = [
         "k": 0x80
     },
     {
+        "opcode": Opcode.ADDI,
+        "rd": Register.R2,
+        "rs1": Register.R1,
+        "rs2": Register.NOT_USED,
+        "k": 5
+    },
+    {
+        "opcode": Opcode.MULH,
+        "rd": Register.R3,
+        "rs1": Register.R1,
+        "rs2": Register.R2,
+        "k": Register.NOT_USED
+    },
+    {
         "opcode": Opcode.HALT,
         "rd": Register.NOT_USED,
         "rs1": Register.NOT_USED,
@@ -331,6 +572,6 @@ code = [
         "k": Register.NOT_USED
     }
 ]
-# control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')])
-# control_unit.run_microcode()
-print(to_hex(code))
+control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 256, [ord('a'), ord('b')], LUT)
+control_unit.run_microcode()
+print(control_unit.data_path.data_memory_module.output_buffer)

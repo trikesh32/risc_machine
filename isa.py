@@ -158,7 +158,7 @@ def to_bytes(code):
     return bytes(binary_bytes)
 
 
-def to_signed(num):
+def to_signed16(num):
     if num & 0x8000:
         return num - 0x10000
     return num
@@ -177,7 +177,7 @@ def to_hex(code):
         rd_bin = (word >> 24) & 0x7
         rs1_bin = (word >> 20) & 0xF
         rs2_bin = (word >> 16) & 0xF
-        k = to_signed(word & 0xFFFF)
+        k = to_signed16(word & 0xFFFF)
         rd = binary_to_reg[rd_bin].value if rd_bin <= 7 else "UNKNOW"
         rs1 = binary_to_reg[rs1_bin].value if rs1_bin <= 8 else "UNKNOW"
         rs2 = binary_to_reg[rs2_bin].value if rs2_bin <= 8 else "UNKNOW"
@@ -256,7 +256,7 @@ def from_bytes(input_file_name):
             rd_bin = (word >> 24) & 0x7
             rs1_bin = (word >> 20) & 0xF
             rs2_bin = (word >> 16) & 0xF
-            k = to_signed(word & 0xFFFF)
+            k = to_signed16(word & 0xFFFF)
             rd = binary_to_reg.get(rd_bin) if binary_to_reg.get(rd_bin) is not None else Register.NOT_USED
             rs1 = binary_to_reg.get(rs1_bin) if binary_to_reg.get(rs1_bin) is not None else Register.NOT_USED
             rs2 = binary_to_reg.get(rs2_bin) if binary_to_reg.get(rs2_bin) is not None else Register.NOT_USED
@@ -368,3 +368,35 @@ def from_bytes(input_file_name):
                 instruction["rs2"] = rs2
             code.append(instruction)
     return code
+
+
+class ALUModes(str, Enum):
+    ADD = "ADD"
+    SUB = "SUB"
+    MUL = "MUL"
+    MULH = "MULH"
+    DIV = "DIV"
+    REM = "REM"
+    SLL = "SLL"
+    SRL = "SRL"
+    AND = "AND"
+    OR = "OR"
+    XOR = "XOR"
+    SRA = "SRA"
+
+class CondModes(str, Enum):
+    EQ = "EQ"
+    NE = "NE"
+    LE = "LE"
+    LEU = "LEU"
+    GT = "GT"
+    GTU = "GTU"
+    TRUE = "TRUE"
+    FALSE = "FALSE"
+
+class Selects(int, Enum):
+    SEL_A = 0
+    SEL_B = 1
+    SEL_C = 2
+    SEL_D = 3
+

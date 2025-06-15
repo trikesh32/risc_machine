@@ -1,19 +1,14 @@
 import sys
 
 from isa import (
-    Opcode,
-    Register,
-    reg_to_binary,
-    binary_to_reg,
-    opcode_to_binary,
-    binary_to_opcode,
-    to_hex,
-    to_signed16,
     ALUModes,
     CondModes,
+    Opcode,
+    Register,
     Selects,
     from_bytes,
     get_data_dump,
+    to_signed16,
 )
 
 
@@ -56,54 +51,41 @@ class DataPath:
     def alu(self, mode):
         a = self.op1_mux
         b = self.op2_mux
-        if mode == ALUModes.ADD:
-            self.res = (a + b) & 0xFFFFFFFF
-        elif mode == ALUModes.SUB:
-            self.res = (a - b) & 0xFFFFFFFF
-        elif mode == ALUModes.MUL:
-            self.res = (a * b) & 0xFFFFFFFF
-        elif mode == ALUModes.MULH:
-            self.res = ((a * b) & 0xFFFFFFFF00000000) >> 32
-        elif mode == ALUModes.DIV:
-            self.res = (a // b) & 0xFFFFFFFF
-        elif mode == ALUModes.REM:
-            self.res = (a % b) & 0xFFFFFFFF
-        elif mode == ALUModes.SLL:
-            self.res = (a << b) & 0xFFFFFFFF
-        elif mode == ALUModes.SRL:
-            self.res = (a & 0xFFFFFFFF >> b) & 0xFFFFFFFF
-        elif mode == ALUModes.AND:
-            self.res = (a & b) & 0xFFFFFFFF
-        elif mode == ALUModes.OR:
-            self.res = (a | b) & 0xFFFFFFFF
-        elif mode == ALUModes.XOR:
-            self.res = (a ^ b) & 0xFFFFFFFF
-        elif mode == ALUModes.SRA:
-            self.res = (a >> b) & 0xFFFFFFFF
-        else:
-            self.res = 0
+
+        operations = {
+            ALUModes.ADD: lambda: (a + b) & 0xFFFFFFFF,
+            ALUModes.SUB: lambda: (a - b) & 0xFFFFFFFF,
+            ALUModes.MUL: lambda: (a * b) & 0xFFFFFFFF,
+            ALUModes.MULH: lambda: ((a * b) & 0xFFFFFFFF00000000) >> 32,
+            ALUModes.DIV: lambda: (a // b) & 0xFFFFFFFF if b != 0 else 0,
+            ALUModes.REM: lambda: (a % b) & 0xFFFFFFFF if b != 0 else 0,
+            ALUModes.SLL: lambda: (a << b) & 0xFFFFFFFF,
+            ALUModes.SRL: lambda: (a & 0xFFFFFFFF) >> b,
+            ALUModes.AND: lambda: (a & b) & 0xFFFFFFFF,
+            ALUModes.OR: lambda: (a | b) & 0xFFFFFFFF,
+            ALUModes.XOR: lambda: (a ^ b) & 0xFFFFFFFF,
+            ALUModes.SRA: lambda: (a >> b) & 0xFFFFFFFF
+        }
+
+        self.res = operations.get(mode, lambda: 0)()
 
     def cond(self, mode):
         a = self.rs1_mux
         b = self.rs2_mux
-        if mode == CondModes.EQ:
-            return to_signed16(a) == to_signed16(b)
-        elif mode == CondModes.NE:
-            return to_signed16(a) != to_signed16(b)
-        elif mode == CondModes.LE:
-            return to_signed16(a) <= to_signed16(b)
-        elif mode == CondModes.LEU:
-            return a <= b
-        elif mode == CondModes.GT:
-            return to_signed16(a) > to_signed16(b)
-        elif mode == CondModes.GTU:
-            return a > b
-        elif mode == CondModes.TRUE:
-            return True
-        elif mode == CondModes.FALSE:
-            return False
-        else:
-            return None
+
+        operations = {
+            CondModes.EQ: lambda: to_signed16(a) == to_signed16(b),
+            CondModes.NE: lambda: to_signed16(a) != to_signed16(b),
+            CondModes.LE: lambda: to_signed16(a) <= to_signed16(b),
+            CondModes.LEU: lambda: a <= b,
+            CondModes.GT: lambda: to_signed16(a) > to_signed16(b),
+            CondModes.GTU: lambda: a > b,
+            CondModes.TRUE: lambda: True,
+            CondModes.FALSE: lambda: False
+        }
+
+        condition_func = operations.get(mode)
+        return condition_func() if condition_func else None
 
     def latch_file(self, rd):
         setattr(self, rd.value, self.file_mux)
@@ -153,8 +135,7 @@ class DataPath:
             self.op2_mux = self.imm
 
     def __str__(self):
-        s = f"r0: {self.r0}. r1: {self.r1}. r2: {self.r2}. r3: {self.r3}. r4: {self.r4}. r5: {self.r5}, r6: {self.r6}, sp: {self.sp}, ar: {self.ar}"
-        return s
+        return f"r0: {self.r0}. r1: {self.r1}. r2: {self.r2}. r3: {self.r3}. r4: {self.r4}. r5: {self.r5}, r6: {self.r6}, sp: {self.sp}, ar: {self.ar}"
 
 
 class ControlUnit:
@@ -169,7 +150,7 @@ class ControlUnit:
     halted = None  # инициализируется False
     LUT = None  # инициализируется входными данными конструктора
 
-    def __init__(self, microcode_memory, program, input_addr, output_addr, data_memory_size, input_buffer, LUT):
+    def __init__(self, microcode_memory, program, input_addr, output_addr, data_memory_size, input_buffer, lut):
         self.program_counter = 0
         self.program_memory = program
         self.tick = 0
@@ -178,7 +159,7 @@ class ControlUnit:
         self.program_register = None
         self.data_path = DataPath(input_addr, output_addr, data_memory_size, input_buffer)
         self.microcode_memory = microcode_memory
-        self.LUT = LUT
+        self.LUT = lut
         self.halted = False
         # мультиплексоры
         self.pc_mux = 0
@@ -638,8 +619,7 @@ class DataMemoryModule:
         b = self.data_memory[address + 1]
         c = self.data_memory[address + 2]
         d = self.data_memory[address + 3]
-        res = (d << 24) | (c << 16) | (b << 8) | a
-        return res
+        return (d << 24) | (c << 16) | (b << 8) | a
 
     def write_word(self, address, value):
         assert (

@@ -1,5 +1,3 @@
-import opcode
-import pprint
 from enum import Enum
 
 
@@ -162,85 +160,139 @@ def to_signed16(num):
     return num
 
 
-def to_hex(code):
+def _extract_instruction_fields(word: int) -> tuple:
+    opcode_bin = word >> 27
+    rd_bin = (word >> 24) & 0x7
+    rs1_bin = (word >> 20) & 0xF
+    rs2_bin = (word >> 16) & 0xF
+    k = to_signed16(word & 0xFFFF)
+    return opcode_bin, rd_bin, rs1_bin, rs2_bin, k
+
+
+def _get_register_name(reg_bin: int, max_valid: int = 8) -> str:
+    return binary_to_reg[reg_bin].value if reg_bin <= max_valid else "UNKNOW"
+
+
+def _generate_mnemonic(opcode: Opcode, rd: str, rs1: str, rs2: str, k: int) -> str:
+    mnemonics = {
+        Opcode.LUI: f"lui {rd}, {k}",
+        Opcode.MV: f"mv {rd}, {rs1}",
+        Opcode.SW: f"sw {rs2}, {k}({rs1})",
+        Opcode.LW: f"lw {rd}, {k}({rs1})",
+        Opcode.ADDI: f"addi {rd}, {rs1}, {k}",
+        Opcode.ADD: f"add {rd}, {rs1}, {rs2}",
+        Opcode.SUB: f"sub {rd}, {rs1}, {rs2}",
+        Opcode.MUL: f"mul {rd}, {rs1}, {rs2}",
+        Opcode.MULH: f"mulh {rd}, {rs1}, {rs2}",
+        Opcode.DIV: f"div {rd}, {rs1}, {rs2}",
+        Opcode.REM: f"rem {rd}, {rs1}, {rs2}",
+        Opcode.SLL: f"sll {rd}, {rs1}, {rs2}",
+        Opcode.SRL: f"srl {rd}, {rs1}, {rs2}",
+        Opcode.AND: f"and {rd}, {rs1}, {rs2}",
+        Opcode.OR: f"or {rd}, {rs1}, {rs2}",
+        Opcode.XOR: f"xor {rd}, {rs1}, {rs2}",
+        Opcode.J: f"j {k}",
+        Opcode.JAL: f"jal {rd}, {k}",
+        Opcode.JR: f"jr {rs1}",
+        Opcode.BLEU: f"bleu {rs1}, {rs2}, {k}",
+        Opcode.BLE: f"ble {rs1}, {rs2}, {k}",
+        Opcode.BGT: f"bgt {rs1}, {rs2}, {k}",
+        Opcode.BGTU: f"bgtu {rs1}, {rs2}, {k}",
+        Opcode.BNE: f"bne {rs1}, {rs2}, {k}",
+        Opcode.BEQ: f"beq {rs1}, {rs2}, {k}",
+        Opcode.HALT: "halt",
+        Opcode.SRA: f"sra {rd}, {rs1}, {rs2}",
+    }
+    return mnemonics.get(opcode, f"UNKNOWN_{opcode.value:02X}")
+
+
+def to_hex(code: bytes) -> str:
     binary_code = to_bytes(code)
     result = []
+
     for i in range(0, len(binary_code), 4):
         if i + 3 >= len(binary_code):
             break
+
         word = (binary_code[i] << 24) | (binary_code[i + 1] << 16) | (binary_code[i + 2] << 8) | binary_code[i + 3]
-        opcode_bin = word >> 27
-        opcode = binary_to_opcode[opcode_bin]
+        opcode_bin, rd_bin, rs1_bin, rs2_bin, k = _extract_instruction_fields(word)
 
-        rd_bin = (word >> 24) & 0x7
-        rs1_bin = (word >> 20) & 0xF
-        rs2_bin = (word >> 16) & 0xF
-        k = to_signed16(word & 0xFFFF)
-        rd = binary_to_reg[rd_bin].value if rd_bin <= 7 else "UNKNOW"
-        rs1 = binary_to_reg[rs1_bin].value if rs1_bin <= 8 else "UNKNOW"
-        rs2 = binary_to_reg[rs2_bin].value if rs2_bin <= 8 else "UNKNOW"
-        if opcode == Opcode.LUI:
-            mnemonic = f"lui {rd}, {k}"
-        elif opcode == Opcode.MV:
-            mnemonic = f"mv {rd}, {rs1}"
-        elif opcode == Opcode.SW:
-            mnemonic = f"sw {rs2}, {k}({rs1})"
-        elif opcode == Opcode.LW:
-            mnemonic = f"lw {rs2}, {k}({rs1})"
-        elif opcode == Opcode.ADDI:
-            mnemonic = f"addi {rd}, {rs1}, {k}"
-        elif opcode == Opcode.ADD:
-            mnemonic = f"add {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.SUB:
-            mnemonic = f"sub {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.MUL:
-            mnemonic = f"mul {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.MULH:
-            mnemonic = f"mulh {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.DIV:
-            mnemonic = f"div {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.REM:
-            mnemonic = f"rem {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.SLL:
-            mnemonic = f"sll {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.SRL:
-            mnemonic = f"srl {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.AND:
-            mnemonic = f"and {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.OR:
-            mnemonic = f"or {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.XOR:
-            mnemonic = f"xor {rd}, {rs1}, {rs2}"
-        elif opcode == Opcode.J:
-            mnemonic = f"j {k}"
-        elif opcode == Opcode.JAL:
-            mnemonic = f"jal {rd}, {k}"
-        elif opcode == Opcode.JR:
-            mnemonic = f"jr {rs1}"
-        elif opcode == Opcode.BLEU:
-            mnemonic = f"bleu {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BLE:
-            mnemonic = f"ble {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BGT:
-            mnemonic = f"bgt {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BGTU:
-            mnemonic = f"bgtu {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BNE:
-            mnemonic = f"bne {rs1}, {rs2}, {k}"
-        elif opcode == Opcode.BEQ:
-            mnemonic = f"beq {rs1}, {rs2}, {k}"
-        elif opcode == opcode.HALT:
-            mnemonic = f"halt"
-        elif opcode == opcode.SRA:
-            mnemonic = f"sra {rd}, {rs1}, {rs2}"
-        else:
-            mnemonic = f"UNKNOWN_{opcode_bin:02X}"
+        opcode = binary_to_opcode.get(opcode_bin)
+        rd = _get_register_name(rd_bin, max_valid=7)
+        rs1 = _get_register_name(rs1_bin)
+        rs2 = _get_register_name(rs2_bin)
 
+        mnemonic = _generate_mnemonic(opcode, rd, rs1, rs2, k) if opcode else f"UNKNOWN_{opcode_bin:02X}"
         result.append(f"{i // 4} - {word:08X} - {mnemonic}")
+
     return "\n".join(result)
 
 
-def from_bytes(input_file_name):
+def _parse_instruction_word(word: int) -> dict:
+    opcode_bin = word >> 27
+    return {
+        "opcode": binary_to_opcode.get(opcode_bin),
+        "rd_bin": (word >> 24) & 0x7,
+        "rs1_bin": (word >> 20) & 0xF,
+        "rs2_bin": (word >> 16) & 0xF,
+        "k": to_signed16(word & 0xFFFF)
+    }
+
+
+def _get_register(reg_bin: int) -> Register:
+    return binary_to_reg.get(reg_bin, Register.NOT_USED)
+
+
+def _build_instruction(fields: dict) -> dict:
+    opcode = fields["opcode"]
+    if opcode is None:
+        return {"opcode": None}
+
+    instruction = {
+        "opcode": opcode,
+        "rd": Register.NOT_USED,
+        "rs1": Register.NOT_USED,
+        "rs2": Register.NOT_USED,
+        "k": Register.NOT_USED,
+    }
+
+    field_mapping = {
+        Opcode.LUI: ["rd", "k"],
+        Opcode.MV: ["rd", "rs1"],
+        Opcode.SW: ["rs1", "rs2", "k"],
+        Opcode.LW: ["rd", "rs1", "k"],
+        Opcode.ADDI: ["rd", "rs1", "k"],
+        Opcode.ADD: ["rd", "rs1", "rs2"],
+        Opcode.SUB: ["rd", "rs1", "rs2"],
+        Opcode.MUL: ["rd", "rs1", "rs2"],
+        Opcode.MULH: ["rd", "rs1", "rs2"],
+        Opcode.DIV: ["rd", "rs1", "rs2"],
+        Opcode.REM: ["rd", "rs1", "rs2"],
+        Opcode.SLL: ["rd", "rs1", "rs2"],
+        Opcode.SRL: ["rd", "rs1", "rs2"],
+        Opcode.SRA: ["rd", "rs1", "rs2"],
+        Opcode.AND: ["rd", "rs1", "rs2"],
+        Opcode.OR: ["rd", "rs1", "rs2"],
+        Opcode.XOR: ["rd", "rs1", "rs2"],
+        Opcode.J: ["k"],
+        Opcode.JAL: ["rd", "k"],
+        Opcode.JR: ["rs1"],
+        Opcode.BLEU: ["rs1", "rs2", "k"],
+        Opcode.BLE: ["rs1", "rs2", "k"],
+        Opcode.BGT: ["rs1", "rs2", "k"],
+        Opcode.BGTU: ["rs1", "rs2", "k"],
+        Opcode.BNE: ["rs1", "rs2", "k"],
+        Opcode.BEQ: ["rs1", "rs2", "k"],
+        Opcode.HALT: []
+    }
+
+    for field in field_mapping.get(opcode, []):
+        instruction[field] = fields[field]
+
+    return instruction
+
+
+def from_bytes(input_file_name: str) -> list:
     code = []
     with open(input_file_name, "rb") as f:
         while True:
@@ -249,122 +301,17 @@ def from_bytes(input_file_name):
                 break
 
             word = int.from_bytes(bytes_data, "big")
-            opcode_bin = word >> 27
-            opcode = binary_to_opcode.get(opcode_bin)
-            rd_bin = (word >> 24) & 0x7
-            rs1_bin = (word >> 20) & 0xF
-            rs2_bin = (word >> 16) & 0xF
-            k = to_signed16(word & 0xFFFF)
-            rd = binary_to_reg.get(rd_bin) if binary_to_reg.get(rd_bin) is not None else Register.NOT_USED
-            rs1 = binary_to_reg.get(rs1_bin) if binary_to_reg.get(rs1_bin) is not None else Register.NOT_USED
-            rs2 = binary_to_reg.get(rs2_bin) if binary_to_reg.get(rs2_bin) is not None else Register.NOT_USED
-            instruction = {
-                "opcode": opcode,
-                "rd": Register.NOT_USED,
-                "rs1": Register.NOT_USED,
-                "rs2": Register.NOT_USED,
-                "k": Register.NOT_USED,
-            }
-            if opcode == Opcode.LUI:
-                instruction["rd"] = rd
-                instruction["k"] = k
-            elif opcode == Opcode.MV:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-            elif opcode == Opcode.SW:
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-                instruction["k"] = k
-            elif opcode == Opcode.LW:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.ADDI:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.ADD:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.SUB:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.MUL:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.MULH:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.DIV:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.REM:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.SLL:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.SRL:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.AND:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.OR:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.XOR:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            elif opcode == Opcode.J:
-                instruction["k"] = k
-            elif opcode == Opcode.JAL:
-                instruction["rd"] = rd
-                instruction["k"] = k
-            elif opcode == Opcode.JR:
-                instruction["rs1"] = rs1
-            elif opcode == Opcode.BLEU:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.BLE:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.BGT:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.BGTU:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.BNE:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == Opcode.BEQ:
-                instruction["rs2"] = rs2
-                instruction["rs1"] = rs1
-                instruction["k"] = k
-            elif opcode == opcode.HALT:
-                pass
-            elif opcode == opcode.SRA:
-                instruction["rd"] = rd
-                instruction["rs1"] = rs1
-                instruction["rs2"] = rs2
-            code.append(instruction)
+            fields = _parse_instruction_word(word)
+            fields.update({
+                "rd": _get_register(fields["rd_bin"]),
+                "rs1": _get_register(fields["rs1_bin"]),
+                "rs2": _get_register(fields["rs2_bin"])
+            })
+
+            instruction = _build_instruction(fields)
+            if instruction["opcode"] is not None:
+                code.append(instruction)
+
     return code
 
 

@@ -203,10 +203,10 @@ def _generate_mnemonic(opcode: Opcode, rd: str, rs1: str, rs2: str, k: int) -> s
         Opcode.HALT: "halt",
         Opcode.SRA: f"sra {rd}, {rs1}, {rs2}",
     }
-    return mnemonics.get(opcode, f"UNKNOWN_{opcode.value:02X}")
+    return mnemonics.get(opcode, f"UNKNOWN_{opcode.value}")
 
 
-def to_hex(code: bytes) -> str:
+def to_hex(code):
     binary_code = to_bytes(code)
     result = []
 
@@ -292,7 +292,7 @@ def _build_instruction(fields: dict) -> dict:
     return instruction
 
 
-def from_bytes(input_file_name: str) -> list:
+def from_bytes(input_file_name, input_hex_file_name):
     code = []
     with open(input_file_name, "rb") as f:
         while True:
@@ -313,7 +313,9 @@ def from_bytes(input_file_name: str) -> list:
             instruction = _build_instruction(fields)
             if instruction["opcode"] is not None:
                 code.append(instruction)
-
+    if input_hex_file_name is not None:
+        with open(input_hex_file_name, "w") as f:
+            f.write(to_hex(code))
     return code
 
 

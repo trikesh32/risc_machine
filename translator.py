@@ -68,16 +68,17 @@ def parse_data_word(to_parse):
 
 
 def parse_data_byte(to_parse):
-    args = to_parse.strip().replace(",", " ").split()
     res = bytearray()
+    args = re.findall(r"'[^']*'|[^\s,]+", to_parse.strip().replace(",", " "))
     for arg in args:
-        if is_digit(arg):
-            res.extend(int(arg, 0).to_bytes(1, "little"))
-        elif arg[0] == "'" and arg[-1] == "'" and arg.count("'") == 2:
+        if arg[0] == "'" and arg[-1] == "'" and arg.count("'") == 2:
             arg = arg[1:-1].encode("ascii")
             res.extend(arg)
+        elif is_digit(arg):
+            res.extend(int(arg, 0).to_bytes(1, "little"))
         else:
             raise InvalidDataFormatError()
+
     return list(res)
 
 
@@ -135,7 +136,7 @@ def _process_label_string(line, data_dump, text_dump, current_text_address, curr
     return current_data_address, current_text_address
 
 
-def _process_first_run_end(state, current_data_address, current_text_address, text_dump, line):
+def _process_first_run_end(state, current_data_address, current_text_address, text_dump, line, data_dump):
     if state == 1:
         current_data_address = _process_data_content(line, data_dump, current_data_address)
     elif state == 2:
@@ -184,7 +185,7 @@ def first_run(lines):
             )
             continue
         current_data_address, current_text_address, text_dump, line = _process_first_run_end(
-            state, current_data_address, current_text_address, text_dump, line
+            state, current_data_address, current_text_address, text_dump, line, data_dump
         )
     return data_dump, text_dump
 
@@ -357,11 +358,8 @@ def fourth_run(text_dump):
     return result
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Использование: python translator.py <input.asm> <code.bin> <data.bin>")
-        sys.exit(1)
-    with open(sys.argv[1]) as f:
+def main(input_filename, code_filename, data_filename):
+    with open(input_filename) as f:
         lines = f.readlines()
     first_run(lines)
     data_dump, text_dump = first_run(lines)
@@ -369,15 +367,23 @@ if __name__ == "__main__":
     text_dump = third_run(text_dump)
     text_dump[0] = f"j {text_labels['_start'] - 4}"
     text_dump = fourth_run(text_dump)
-    with open(sys.argv[2], "wb+") as f:
+    with open(code_filename, "wb+") as f:
         for i in range(max(text_dump.keys()) + 1):
             if i in text_dump.keys():
                 f.write(text_dump[i].to_bytes(1, byteorder="little"))
             else:
                 f.write(int.to_bytes(0, 1, byteorder="little"))
-    with open(sys.argv[3], "wb+") as f:
+    with open(data_filename, "wb+") as f:
         for i in range(max(data_dump.keys()) + 1):
             if i in data_dump.keys():
                 f.write(data_dump[i].to_bytes(1, byteorder="little"))
             else:
                 f.write(int.to_bytes(0, 1, byteorder="little"))
+    print("Success")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Использование: python translator.py <input.asm> <code.bin> <data.bin>")
+        sys.exit(1)
+    main(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -1,4 +1,5 @@
 import sys
+import logging
 
 from isa import (
     ALUModes,
@@ -8,7 +9,7 @@ from isa import (
     Selects,
     from_bytes,
     get_data_dump,
-    to_signed16,
+    to_signed16, to_hex,
 )
 
 
@@ -172,6 +173,7 @@ class ControlUnit:
             self.microcode_counter = self.LUT[self.program_register["opcode"]]
         if sel.value == 2:
             self.microcode_counter = 0
+            self.microcode_counter = 0
 
     def latch_pc(self):
         self.program_counter = self.pc_mux
@@ -186,8 +188,7 @@ class ControlUnit:
         self.program_register = self.program_memory[self.program_counter // 4]
 
     def debug_output(self, microcode_name):
-        s = f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path)
-        print(s)
+        logging.debug(f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path) + '\n')
 
     def run_microcode(self):
         while not self.halted:
@@ -614,6 +615,7 @@ class DataMemoryModule:
             assert len(self.input_buffer) != 0, "Буфер ввода пустой!"
             res = int.from_bytes((self.input_buffer[0].to_bytes(4, byteorder="little")), "little")
             self.input_buffer = self.input_buffer[1:]
+            logging.debug(f"Input >> {res}")
             return res
         a = self.data_memory[address]
         b = self.data_memory[address + 1]
@@ -631,6 +633,7 @@ class DataMemoryModule:
         assert address <= self.data_memory_size - 4, "Выход за пределы памяти!"
         if address == self.output_addr:
             self.output_buffer.append(value)
+            logging.debug(f"Output << {value}")
             return
         value_bytes = value.to_bytes(4, byteorder="little")
         self.data_memory[address] = value_bytes[0]
@@ -642,8 +645,25 @@ class DataMemoryModule:
         for i in range(len(data_dump)):
             self.data_memory[i] = data_dump[i]
 
+def main(program_dump_filename, data_dump_filename, input_file, input_fmt, target_hex=None):
+    if input_fmt == "num":
+        input_buffer = list(map(int, open(input_file).readlines()))
+    else:
+        string = open(input_file).readline()
+        if "<none>" in string:
+            input_buffer = []
+        else:
+            input_buffer = list(map(ord, open(input_file).readline()))
+            input_buffer.append(0)
+    code = from_bytes(program_dump_filename, target_hex)
+    control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 1024, input_buffer, LUT)
+    control_unit.data_path.data_memory_module.load_dump(get_data_dump(data_dump_filename))
+    control_unit.run_microcode()
+    print(control_unit.data_path.data_memory_module.output_buffer)
+    print("".join(map(chr, control_unit.data_path.data_memory_module.output_buffer)))
 
 if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.DEBUG)
     if len(sys.argv) != 5:
         print("Использование: python machine.py <program_dump> <data_dump> <input_file> <input_fmt> (num | str)")
         exit(1)
@@ -651,8 +671,9 @@ if __name__ == "__main__":
         input_buffer = list(map(int, open(sys.argv[3]).readlines()))
     else:
         input_buffer = list(map(ord, open(sys.argv[3]).readline()))
-        input_buffer[-1] = 0
-    code = from_bytes(sys.argv[1])
+        input_buffer.append(0)
+    code = from_bytes(sys.argv[1], None)
+    print(to_hex(code))
     control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 1024, input_buffer, LUT)
     control_unit.data_path.data_memory_module.load_dump(get_data_dump(sys.argv[2]))
     control_unit.run_microcode()

@@ -10,7 +10,7 @@ from isa import (
     from_bytes,
     get_data_dump,
     to_hex,
-    to_signed16,
+    to_signed16, to_signed32,
 )
 
 
@@ -76,11 +76,11 @@ class DataPath:
         b = self.rs2_mux
 
         operations = {
-            CondModes.EQ: lambda: to_signed16(a) == to_signed16(b),
-            CondModes.NE: lambda: to_signed16(a) != to_signed16(b),
-            CondModes.LE: lambda: to_signed16(a) <= to_signed16(b),
+            CondModes.EQ: lambda: a == b,
+            CondModes.NE: lambda: a != b,
+            CondModes.LE: lambda: to_signed32(a) <= to_signed32(b),
             CondModes.LEU: lambda: a <= b,
-            CondModes.GT: lambda: to_signed16(a) > to_signed16(b),
+            CondModes.GT: lambda: to_signed32(a) > to_signed32(b),
             CondModes.GTU: lambda: a > b,
             CondModes.TRUE: lambda: True,
             CondModes.FALSE: lambda: False,
@@ -614,7 +614,7 @@ class DataMemoryModule:
         assert address <= self.data_memory_size - 4, "Выход за пределы памяти!"
         if address == self.input_addr:
             assert len(self.input_buffer) != 0, "Буфер ввода пустой!"
-            res = int.from_bytes((self.input_buffer[0].to_bytes(4, byteorder="little")), "little")
+            res = int.from_bytes(((self.input_buffer[0] & 0xFFFFFFFF).to_bytes(4, byteorder="little")), "little")
             self.input_buffer = self.input_buffer[1:]
             logging.debug(f"Input >> {res}")
             return res
@@ -662,7 +662,8 @@ def main(program_dump_filename, data_dump_filename, input_file, input_fmt, targe
     control_unit.run_microcode()
     output_buffer = control_unit.data_path.data_memory_module.output_buffer.copy()
     print(output_buffer)
-    print("".join(map(chr, output_buffer)))
+    if input_fmt != "num":
+        print("".join(map(lambda x: chr(x & 0xFF), output_buffer)))
 
 
 if __name__ == "__main__":
@@ -671,7 +672,7 @@ if __name__ == "__main__":
         print("Использование: python machine.py <program_dump> <data_dump> <input_file> <input_fmt> (num | str)")
         exit(1)
     if sys.argv[4] == "num":
-        input_buffer = list(map(int, open(sys.argv[3]).readlines()))
+        input_buffer = list(map(lambda x: int(x, 0), map(str.strip, open(sys.argv[3]).readlines())))
     else:
         input_buffer = list(map(ord, open(sys.argv[3]).readline()))
         input_buffer.append(0)
@@ -681,4 +682,5 @@ if __name__ == "__main__":
     control_unit.data_path.data_memory_module.load_dump(get_data_dump(sys.argv[2]))
     control_unit.run_microcode()
     print(control_unit.data_path.data_memory_module.output_buffer)
-    print("".join(map(chr, control_unit.data_path.data_memory_module.output_buffer)))
+    if sys.argv[4] != "num":
+        print("".join(map(lambda x: chr(x & 0xFF), control_unit.data_path.data_memory_module.output_buffer)))

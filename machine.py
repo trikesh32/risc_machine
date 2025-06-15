@@ -1,5 +1,5 @@
-import sys
 import logging
+import sys
 
 from isa import (
     ALUModes,
@@ -9,7 +9,8 @@ from isa import (
     Selects,
     from_bytes,
     get_data_dump,
-    to_signed16, to_hex,
+    to_hex,
+    to_signed16,
 )
 
 
@@ -188,7 +189,7 @@ class ControlUnit:
         self.program_register = self.program_memory[self.program_counter // 4]
 
     def debug_output(self, microcode_name):
-        logging.debug(f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path) + '\n')
+        logging.debug(f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path) + "\n")
 
     def run_microcode(self):
         while not self.halted:
@@ -645,6 +646,7 @@ class DataMemoryModule:
         for i in range(len(data_dump)):
             self.data_memory[i] = data_dump[i]
 
+
 def main(program_dump_filename, data_dump_filename, input_file, input_fmt, target_hex=None):
     if input_fmt == "num":
         input_buffer = list(map(int, open(input_file).readlines()))
@@ -661,6 +663,7 @@ def main(program_dump_filename, data_dump_filename, input_file, input_fmt, targe
     control_unit.run_microcode()
     print(control_unit.data_path.data_memory_module.output_buffer)
     print("".join(map(chr, control_unit.data_path.data_memory_module.output_buffer)))
+
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)

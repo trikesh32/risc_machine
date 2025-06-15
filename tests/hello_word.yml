@@ -1,17 +1,19 @@
 input_fmt: "str"
-in_stdin: "bla bla bla im cool man!"
+in_stdin: |-
+    <none>
 in_source: |-
     .data
     input_addr: .word 0x80
     output_addr: .word 0x84
+    string: .byte 'Hello', 44, ' World!', 0
     .text
     _start:
         lui r0, %hi(output_addr)
         addi r0, r0, %lo(output_addr)
         lw r0, 0(r0) ; r0 - указатель на вывод
-        lui r1, %hi(output_addr)
-        addi r1, r1, %lo(output_addr)
-        lw r1, 0(r1) ; r1 - указатель на вход
+        lui r1, %hi(string)
+        addi r1, r1, %lo(string) ; r1 - указатель на нынешний элемент строки
+        addi r3, zero, 0xFF ; маска для выделения младшего байта
         lw r2, 0(r1)
         and r2, r2, r3
         while:
@@ -26,6 +28,9 @@ in_source: |-
 
 out_code: !!binary |
     gAAAAAEAAAAhEAAEGRAAAAIAAAAiIAAIJIAA/xsgAABrNAAAuDgAFBATAAAiIAABGyAAAGs0AACAAP/oyAAAAA==
+
+out_data: !!binary |
+    gAAAAIQAAABIZWxsbywgV29ybGQhAA==
 
 out_code_hex: |-
     0 - 80000000 - j 0
@@ -654,4 +659,5 @@ out_log: |-
     DEBUG   machine:debug_output  TICK: 294, DECODE, PC: 64 r0: 132. r1: 21. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 21
     
     DEBUG   machine:debug_output  TICK: 295, HALT, PC: 64 r0: 132. r1: 21. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 21
+    
     

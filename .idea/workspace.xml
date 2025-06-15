@@ -4,18 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="poetry.lock added">
-      <change afterPath="$PROJECT_DIR$/golden_tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/hello_word.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/python.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/python.yaml" afterDir="false" />
+    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="добавил первый тест!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/a.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/b.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/isa.py" beforeDir="false" afterPath="$PROJECT_DIR$/isa.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/golden_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/golden_tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/machine.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/programs/input.txt" beforeDir="false" afterPath="$PROJECT_DIR$/programs/input.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/programs/test.asm" beforeDir="false" afterPath="$PROJECT_DIR$/programs/test.asm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translator.py" beforeDir="false" afterPath="$PROJECT_DIR$/translator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/cat.yml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cat.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/hello_word.yml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/hello_word.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -223,7 +219,7 @@
       <workItem from="1749809437953" duration="7000" />
       <workItem from="1749819843072" duration="1000" />
       <workItem from="1749856780134" duration="13087000" />
-      <workItem from="1749872062433" duration="49496000" />
+      <workItem from="1749872062433" duration="52149000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -401,7 +397,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749949583456</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="добавил первый тест!">
+      <option name="closed" value="true" />
+      <created>1749959241782</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1749959241782</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -432,12 +436,13 @@
     <MESSAGE value="linter ликвидирован (вроде)" />
     <MESSAGE value="ага, формат слетел)))" />
     <MESSAGE value="poetry.lock added" />
-    <option name="LAST_COMMIT_MESSAGE" value="poetry.lock added" />
+    <MESSAGE value="добавил первый тест!" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавил первый тест!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/risc_machine$isa.coverage" NAME="isa Coverage Results" MODIFIED="1749912720581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/risc_machine$translator.coverage" NAME="translator Coverage Results" MODIFIED="1749956612175" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/risc_machine$machine.coverage" NAME="machine Coverage Results" MODIFIED="1749958129867" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/risc_machine$machine.coverage" NAME="machine Coverage Results" MODIFIED="1749962256450" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/risc_machine$.coverage" NAME=" Coverage Results" MODIFIED="1749953316451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

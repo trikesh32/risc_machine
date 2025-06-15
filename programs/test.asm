@@ -1,7 +1,7 @@
 .data
     input_addr: .word 0x80
     output_addr: .word 0x84
-    string: .byte 'Hello', 44, ' World!', 0
+    greeting: .byte 'What is your name?',0
     .text
     _start:
         lui r0, %hi(output_addr)

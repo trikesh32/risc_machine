@@ -8,6 +8,7 @@ import machine
 import pytest
 import translator
 
+
 @pytest.mark.golden_test("tests/*.yml")
 def test_translator_asm_and_machine(golden, caplog):
     caplog.set_level(logging.DEBUG)
@@ -23,18 +24,20 @@ def test_translator_asm_and_machine(golden, caplog):
         with open(input_stream, "w", encoding="utf-8") as file:
             file.write(golden["in_stdin"])
 
-
         with contextlib.redirect_stdout(io.StringIO()) as stdout:
             translator.main(source, target, target_data)
             print("============================================================")
-            machine.main(target, target_data,  input_stream, input_fmt, target_hex)
+            machine.main(target, target_data, input_stream, input_fmt, target_hex)
 
         with open(target, "rb") as file:
             code = file.read()
+        with open(target_data, "rb") as file:
+            data = file.read()
         with open(target_hex, encoding="utf-8") as file:
             code_hex = file.read()
 
         assert code == golden.out["out_code"]
+        assert data == golden.out["out_data"]
         assert code_hex == golden.out["out_code_hex"]
         assert stdout.getvalue() == golden.out["out_stdout"]
         assert caplog.text[:-2] == golden.out["out_log"]

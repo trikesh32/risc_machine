@@ -1,0 +1,1264 @@
+input_fmt: "str"
+
+in_stdin: |-
+    <none>
+
+in_source: |-
+    .macros SP_INIT 1000
+    .data
+    input_addr: .word 0x80
+    output_addr: .word 0x84
+
+    .text
+    check_palindromic: ; в r6 адрес возврата!!
+        lw r0, 0(sp)
+        mv r1, zero
+        addi r2, zero, 10
+        while:
+            beq r0, zero, while_end
+            mul r1, r1, r2
+            rem r3, r0, r2
+            add r1, r1, r3
+            div r0, r0, r2
+            j while
+        while_end:
+            lw r0, 0(sp)
+            beq r0, r1, palindromic
+            addi r0, zero, 1
+            sw r0, 0(sp)
+            jr r6
+        palindromic:
+            sw zero, 0(sp)
+            jr r6
+
+    _start:
+        addi sp, zero, SP_INIT
+        addi r3, zero, 99
+        addi r1, zero, 999
+        mv r5, zero
+        loop:
+            beq r1, r3, goal
+            add r2, zero, r1
+            mul r2, r2, r1
+            ble r2, r5, goal
+            add r2, zero, r1
+            inner_loop:
+                ble r2, r3, inner_loop_end
+                mul r4, r1, r2
+
+                addi sp, sp, -16
+                sw r1, 12(sp)
+                sw r2, 8(sp)
+                sw r3, 4(sp)
+                mv r0, r4
+                sw r0, 0(sp)
+                jal r6, check_palindromic
+                lw r0, 0(sp)
+                lw r3, 4(sp)
+                lw r2, 8(sp)
+                lw r1, 12(sp)
+                addi sp, sp, 16
+
+                bne r0, zero, non_pal
+                ble r4, r5, non_pal
+                mv r5, r4
+                mv r3, r2
+                non_pal:
+                    addi r2, r2, -1
+                    j inner_loop
+            inner_loop_end:
+                addi r1, r1, -1
+                j loop
+        goal:
+            lui r0, %hi(output_addr)
+            addi r0, r0, %lo(output_addr)
+            lw r0, 0(r0)
+            sw r5, 0(r0)
+        halt
+
+out_code_hex: |-
+    0 - 80000040 - j 64
+    1 - 19000000 - lw r0, 0(sp)
+    2 - 0A800000 - mv r1, zero
+    3 - 2380000A - addi r2, zero, 10
+    4 - B8180014 - beq r0, zero, 20
+    5 - 3A230000 - mul r1, r1, r2
+    6 - 54130000 - rem r3, r0, r2
+    7 - 2A240000 - add r1, r1, r3
+    8 - 49130000 - div r0, r0, r2
+    9 - 8000FFE8 - j -24
+    10 - 19000000 - lw r0, 0(sp)
+    11 - B812000C - beq r0, r1, 12
+    12 - 21800001 - addi r0, zero, 1
+    13 - 10010000 - sw r0, 0(sp)
+    14 - 90700000 - jr r6
+    15 - 10080000 - sw zero, 0(sp)
+    16 - 90700000 - jr r6
+    17 - 208003E8 - addi sp, zero, 1000
+    18 - 24800063 - addi r3, zero, 99
+    19 - 228003E7 - addi r1, zero, 999
+    20 - 0E800000 - mv r5, zero
+    21 - B8240068 - beq r1, r3, 104
+    22 - 2B820000 - add r2, zero, r1
+    23 - 3B320000 - mul r2, r2, r1
+    24 - 9836005C - ble r2, r5, 92
+    25 - 2B820000 - add r2, zero, r1
+    26 - 9834004C - ble r2, r3, 76
+    27 - 3D230000 - mul r4, r1, r2
+    28 - 2000FFF0 - addi sp, sp, -16
+    29 - 1002000C - sw r1, 12(sp)
+    30 - 10030008 - sw r2, 8(sp)
+    31 - 10040004 - sw r3, 4(sp)
+    32 - 09500000 - mv r0, r4
+    33 - 10010000 - sw r0, 0(sp)
+    34 - 8F00FF78 - jal r6, -136
+    35 - 19000000 - lw r0, 0(sp)
+    36 - 1C000004 - lw r3, 4(sp)
+    37 - 1B000008 - lw r2, 8(sp)
+    38 - 1A00000C - lw r1, 12(sp)
+    39 - 20000010 - addi sp, sp, 16
+    40 - C018000C - bne r0, zero, 12
+    41 - 98560008 - ble r4, r5, 8
+    42 - 0E500000 - mv r5, r4
+    43 - 0C300000 - mv r3, r2
+    44 - 2330FFFF - addi r2, r2, -1
+    45 - 8000FFB0 - j -80
+    46 - 2220FFFF - addi r1, r1, -1
+    47 - 8000FF94 - j -108
+    48 - 01000000 - lui r0, 0
+    49 - 21100004 - addi r0, r0, 4
+    50 - 19100000 - lw r0, 0(r0)
+    51 - 10160000 - sw r5, 0(r0)
+    52 - C8000000 - halt
+
+out_stdout: "Success\n============================================================\n[906609]\nq\n"
+
+out_code: !!binary |
+    gAAAQBkAAAAKgAAAI4AACrgYABQ6IwAAVBMAACokAABJEwAAgAD/6BkAAAC4EgAMIYAAARABAACQcAAAEAgAAJBwAAAggAPoJIAAYyKAA+cOgAAAuCQAaCuCAAA7MgAAmDYAXCuCAACYNABMPSMAACAA//AQAgAMEAMACBAEAAQJUAAAEAEAAI8A/3gZAAAAHAAABBsAAAgaAAAMIAAAEMAYAAyYVgAIDlAAAAwwAAAjMP//gAD/sCIg//+AAP+UAQAAACEQAAQZEAAAEBYAAMgAAAA=
+
+out_data: !!binary |
+    gAAAAIQAAAA=
+
+out_log: |-
+    DEBUG   machine:debug_output  TICK: 1, FETCH, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+    DEBUG   machine:debug_output  TICK: 2, DECODE, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+    DEBUG   machine:debug_output  TICK: 3, J, PC: 68 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+    DEBUG   machine:debug_output  TICK: 4, FETCH, PC: 72 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+    DEBUG   machine:debug_output  TICK: 5, DECODE, PC: 72 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+    DEBUG   machine:debug_output  TICK: 6, ADDI, PC: 72 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 7, FETCH, PC: 76 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 8, DECODE, PC: 76 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 9, ADDI, PC: 76 r0: 0. r1: 0. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 10, FETCH, PC: 80 r0: 0. r1: 0. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 11, DECODE, PC: 80 r0: 0. r1: 0. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 12, ADDI, PC: 80 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 13, FETCH, PC: 84 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 14, DECODE, PC: 84 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 15, MV, PC: 84 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 16, FETCH, PC: 88 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 17, DECODE, PC: 88 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 18, BEQ, PC: 88 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 19, FETCH, PC: 92 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 20, DECODE, PC: 92 r0: 0. r1: 999. r2: 0. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 21, ADD, PC: 92 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 22, FETCH, PC: 96 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 23, DECODE, PC: 96 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 24, MUL, PC: 96 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 25, FETCH, PC: 100 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 26, DECODE, PC: 100 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 27, BLE, PC: 100 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 28, FETCH, PC: 104 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 29, DECODE, PC: 104 r0: 0. r1: 999. r2: 998001. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 30, ADD, PC: 104 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 31, FETCH, PC: 108 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 32, DECODE, PC: 108 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 33, BLE, PC: 108 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 34, FETCH, PC: 112 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 35, DECODE, PC: 112 r0: 0. r1: 999. r2: 999. r3: 99. r4: 0. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 36, MUL, PC: 112 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 37, FETCH, PC: 116 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 38, DECODE, PC: 116 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 1000, ar: 0
+    DEBUG   machine:debug_output  TICK: 39, ADDI, PC: 116 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 0
+    DEBUG   machine:debug_output  TICK: 40, FETCH, PC: 120 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 0
+    DEBUG   machine:debug_output  TICK: 41, DECODE, PC: 120 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 0
+    DEBUG   machine:debug_output  TICK: 42, SW_1, PC: 120 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 43, SW_2, PC: 120 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 44, FETCH, PC: 124 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 45, DECODE, PC: 124 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 46, SW_1, PC: 124 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 47, SW_2, PC: 124 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 48, FETCH, PC: 128 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 49, DECODE, PC: 128 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 50, SW_1, PC: 128 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 51, SW_2, PC: 128 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 52, FETCH, PC: 132 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 53, DECODE, PC: 132 r0: 0. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 54, MV, PC: 132 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 55, FETCH, PC: 136 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 56, DECODE, PC: 136 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 57, SW_1, PC: 136 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 58, SW_2, PC: 136 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 59, FETCH, PC: 140 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 60, DECODE, PC: 140 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 0, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 61, JAL, PC: 140 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 62, J, PC: 4 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 63, FETCH, PC: 8 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 64, DECODE, PC: 8 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 65, LW_1, PC: 8 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 66, LW_2, PC: 8 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 67, FETCH, PC: 12 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 68, DECODE, PC: 12 r0: 998001. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 69, MV, PC: 12 r0: 998001. r1: 0. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 70, FETCH, PC: 16 r0: 998001. r1: 0. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 71, DECODE, PC: 16 r0: 998001. r1: 0. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 72, ADDI, PC: 16 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 73, FETCH, PC: 20 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 74, DECODE, PC: 20 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 75, BEQ, PC: 20 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 76, FETCH, PC: 24 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 77, DECODE, PC: 24 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 78, MUL, PC: 24 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 79, FETCH, PC: 28 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 80, DECODE, PC: 28 r0: 998001. r1: 0. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 81, REM, PC: 28 r0: 998001. r1: 0. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 82, FETCH, PC: 32 r0: 998001. r1: 0. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 83, DECODE, PC: 32 r0: 998001. r1: 0. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 84, ADD, PC: 32 r0: 998001. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 85, FETCH, PC: 36 r0: 998001. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 86, DECODE, PC: 36 r0: 998001. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 87, DIV, PC: 36 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 88, FETCH, PC: 40 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 89, DECODE, PC: 40 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 90, J, PC: 16 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 91, FETCH, PC: 20 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 92, DECODE, PC: 20 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 93, BEQ, PC: 20 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 94, FETCH, PC: 24 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 95, DECODE, PC: 24 r0: 99800. r1: 1. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 96, MUL, PC: 24 r0: 99800. r1: 10. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 97, FETCH, PC: 28 r0: 99800. r1: 10. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 98, DECODE, PC: 28 r0: 99800. r1: 10. r2: 10. r3: 1. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 99, REM, PC: 28 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 100, FETCH, PC: 32 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 101, DECODE, PC: 32 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 102, ADD, PC: 32 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 103, FETCH, PC: 36 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 104, DECODE, PC: 36 r0: 99800. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 105, DIV, PC: 36 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 106, FETCH, PC: 40 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 107, DECODE, PC: 40 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 108, J, PC: 16 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 109, FETCH, PC: 20 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 110, DECODE, PC: 20 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 111, BEQ, PC: 20 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 112, FETCH, PC: 24 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 113, DECODE, PC: 24 r0: 9980. r1: 10. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 114, MUL, PC: 24 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 115, FETCH, PC: 28 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 116, DECODE, PC: 28 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 117, REM, PC: 28 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 118, FETCH, PC: 32 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 119, DECODE, PC: 32 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 120, ADD, PC: 32 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 121, FETCH, PC: 36 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 122, DECODE, PC: 36 r0: 9980. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 123, DIV, PC: 36 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 124, FETCH, PC: 40 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 125, DECODE, PC: 40 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 126, J, PC: 16 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 127, FETCH, PC: 20 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 128, DECODE, PC: 20 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 129, BEQ, PC: 20 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 130, FETCH, PC: 24 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 131, DECODE, PC: 24 r0: 998. r1: 100. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 132, MUL, PC: 24 r0: 998. r1: 1000. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 133, FETCH, PC: 28 r0: 998. r1: 1000. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 134, DECODE, PC: 28 r0: 998. r1: 1000. r2: 10. r3: 0. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 135, REM, PC: 28 r0: 998. r1: 1000. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 136, FETCH, PC: 32 r0: 998. r1: 1000. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 137, DECODE, PC: 32 r0: 998. r1: 1000. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 138, ADD, PC: 32 r0: 998. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 139, FETCH, PC: 36 r0: 998. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 140, DECODE, PC: 36 r0: 998. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 141, DIV, PC: 36 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 142, FETCH, PC: 40 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 143, DECODE, PC: 40 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 144, J, PC: 16 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 145, FETCH, PC: 20 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 146, DECODE, PC: 20 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 147, BEQ, PC: 20 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 148, FETCH, PC: 24 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 149, DECODE, PC: 24 r0: 99. r1: 1008. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 150, MUL, PC: 24 r0: 99. r1: 10080. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 151, FETCH, PC: 28 r0: 99. r1: 10080. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 152, DECODE, PC: 28 r0: 99. r1: 10080. r2: 10. r3: 8. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 153, REM, PC: 28 r0: 99. r1: 10080. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 154, FETCH, PC: 32 r0: 99. r1: 10080. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 155, DECODE, PC: 32 r0: 99. r1: 10080. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 156, ADD, PC: 32 r0: 99. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 157, FETCH, PC: 36 r0: 99. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 158, DECODE, PC: 36 r0: 99. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 159, DIV, PC: 36 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 160, FETCH, PC: 40 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 161, DECODE, PC: 40 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 162, J, PC: 16 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 163, FETCH, PC: 20 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 164, DECODE, PC: 20 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 165, BEQ, PC: 20 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 166, FETCH, PC: 24 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 167, DECODE, PC: 24 r0: 9. r1: 10089. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 168, MUL, PC: 24 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 169, FETCH, PC: 28 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 170, DECODE, PC: 28 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 171, REM, PC: 28 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 172, FETCH, PC: 32 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 173, DECODE, PC: 32 r0: 9. r1: 100890. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 174, ADD, PC: 32 r0: 9. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 175, FETCH, PC: 36 r0: 9. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 176, DECODE, PC: 36 r0: 9. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 177, DIV, PC: 36 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 178, FETCH, PC: 40 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 179, DECODE, PC: 40 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 180, J, PC: 16 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 181, FETCH, PC: 20 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 182, DECODE, PC: 20 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 183, BEQ, PC: 40 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 184, FETCH, PC: 44 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 185, DECODE, PC: 44 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 186, LW_1, PC: 44 r0: 0. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 187, LW_2, PC: 44 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 188, FETCH, PC: 48 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 189, DECODE, PC: 48 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 190, BEQ, PC: 48 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 191, FETCH, PC: 52 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 192, DECODE, PC: 52 r0: 998001. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 193, ADDI, PC: 52 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 194, FETCH, PC: 56 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 195, DECODE, PC: 56 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 196, SW_1, PC: 56 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 197, SW_2, PC: 56 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 198, FETCH, PC: 60 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 199, DECODE, PC: 60 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 200, JR, PC: 140 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 201, FETCH, PC: 144 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 202, DECODE, PC: 144 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 203, LW_1, PC: 144 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 204, LW_2, PC: 144 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 205, FETCH, PC: 148 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 206, DECODE, PC: 148 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 207, LW_1, PC: 148 r0: 1. r1: 100899. r2: 10. r3: 9. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 208, LW_2, PC: 148 r0: 1. r1: 100899. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 209, FETCH, PC: 152 r0: 1. r1: 100899. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 210, DECODE, PC: 152 r0: 1. r1: 100899. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 211, LW_1, PC: 152 r0: 1. r1: 100899. r2: 10. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 212, LW_2, PC: 152 r0: 1. r1: 100899. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 213, FETCH, PC: 156 r0: 1. r1: 100899. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 214, DECODE, PC: 156 r0: 1. r1: 100899. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 215, LW_1, PC: 156 r0: 1. r1: 100899. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 216, LW_2, PC: 156 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 217, FETCH, PC: 160 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 218, DECODE, PC: 160 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 219, ADDI, PC: 160 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 220, FETCH, PC: 164 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 221, DECODE, PC: 164 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 222, BNE, PC: 176 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 223, FETCH, PC: 180 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 224, DECODE, PC: 180 r0: 1. r1: 999. r2: 999. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 225, ADDI, PC: 180 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 226, FETCH, PC: 184 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 227, DECODE, PC: 184 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 228, J, PC: 104 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 229, FETCH, PC: 108 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 230, DECODE, PC: 108 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 231, BLE, PC: 108 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 232, FETCH, PC: 112 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 233, DECODE, PC: 112 r0: 1. r1: 999. r2: 998. r3: 99. r4: 998001. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 234, MUL, PC: 112 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 235, FETCH, PC: 116 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 236, DECODE, PC: 116 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 237, ADDI, PC: 116 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 238, FETCH, PC: 120 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 239, DECODE, PC: 120 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 240, SW_1, PC: 120 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 241, SW_2, PC: 120 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 242, FETCH, PC: 124 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 243, DECODE, PC: 124 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 244, SW_1, PC: 124 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 245, SW_2, PC: 124 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 246, FETCH, PC: 128 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 247, DECODE, PC: 128 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 248, SW_1, PC: 128 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 249, SW_2, PC: 128 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 250, FETCH, PC: 132 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 251, DECODE, PC: 132 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 252, MV, PC: 132 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 253, FETCH, PC: 136 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 254, DECODE, PC: 136 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 255, SW_1, PC: 136 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 256, SW_2, PC: 136 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 257, FETCH, PC: 140 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 258, DECODE, PC: 140 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 259, JAL, PC: 140 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 260, J, PC: 4 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 261, FETCH, PC: 8 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 262, DECODE, PC: 8 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 263, LW_1, PC: 8 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 264, LW_2, PC: 8 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 265, FETCH, PC: 12 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 266, DECODE, PC: 12 r0: 997002. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 267, MV, PC: 12 r0: 997002. r1: 0. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 268, FETCH, PC: 16 r0: 997002. r1: 0. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 269, DECODE, PC: 16 r0: 997002. r1: 0. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 270, ADDI, PC: 16 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 271, FETCH, PC: 20 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 272, DECODE, PC: 20 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 273, BEQ, PC: 20 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 274, FETCH, PC: 24 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 275, DECODE, PC: 24 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 276, MUL, PC: 24 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 277, FETCH, PC: 28 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 278, DECODE, PC: 28 r0: 997002. r1: 0. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 279, REM, PC: 28 r0: 997002. r1: 0. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 280, FETCH, PC: 32 r0: 997002. r1: 0. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 281, DECODE, PC: 32 r0: 997002. r1: 0. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 282, ADD, PC: 32 r0: 997002. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 283, FETCH, PC: 36 r0: 997002. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 284, DECODE, PC: 36 r0: 997002. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 285, DIV, PC: 36 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 286, FETCH, PC: 40 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 287, DECODE, PC: 40 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 288, J, PC: 16 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 289, FETCH, PC: 20 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 290, DECODE, PC: 20 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 291, BEQ, PC: 20 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 292, FETCH, PC: 24 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 293, DECODE, PC: 24 r0: 99700. r1: 2. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 294, MUL, PC: 24 r0: 99700. r1: 20. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 295, FETCH, PC: 28 r0: 99700. r1: 20. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 296, DECODE, PC: 28 r0: 99700. r1: 20. r2: 10. r3: 2. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 297, REM, PC: 28 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 298, FETCH, PC: 32 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 299, DECODE, PC: 32 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 300, ADD, PC: 32 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 301, FETCH, PC: 36 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 302, DECODE, PC: 36 r0: 99700. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 303, DIV, PC: 36 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 304, FETCH, PC: 40 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 305, DECODE, PC: 40 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 306, J, PC: 16 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 307, FETCH, PC: 20 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 308, DECODE, PC: 20 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 309, BEQ, PC: 20 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 310, FETCH, PC: 24 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 311, DECODE, PC: 24 r0: 9970. r1: 20. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 312, MUL, PC: 24 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 313, FETCH, PC: 28 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 314, DECODE, PC: 28 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 315, REM, PC: 28 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 316, FETCH, PC: 32 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 317, DECODE, PC: 32 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 318, ADD, PC: 32 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 319, FETCH, PC: 36 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 320, DECODE, PC: 36 r0: 9970. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 321, DIV, PC: 36 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 322, FETCH, PC: 40 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 323, DECODE, PC: 40 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 324, J, PC: 16 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 325, FETCH, PC: 20 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 326, DECODE, PC: 20 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 327, BEQ, PC: 20 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 328, FETCH, PC: 24 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 329, DECODE, PC: 24 r0: 997. r1: 200. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 330, MUL, PC: 24 r0: 997. r1: 2000. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 331, FETCH, PC: 28 r0: 997. r1: 2000. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 332, DECODE, PC: 28 r0: 997. r1: 2000. r2: 10. r3: 0. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 333, REM, PC: 28 r0: 997. r1: 2000. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 334, FETCH, PC: 32 r0: 997. r1: 2000. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 335, DECODE, PC: 32 r0: 997. r1: 2000. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 336, ADD, PC: 32 r0: 997. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 337, FETCH, PC: 36 r0: 997. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 338, DECODE, PC: 36 r0: 997. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 339, DIV, PC: 36 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 340, FETCH, PC: 40 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 341, DECODE, PC: 40 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 342, J, PC: 16 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 343, FETCH, PC: 20 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 344, DECODE, PC: 20 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 345, BEQ, PC: 20 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 346, FETCH, PC: 24 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 347, DECODE, PC: 24 r0: 99. r1: 2007. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 348, MUL, PC: 24 r0: 99. r1: 20070. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 349, FETCH, PC: 28 r0: 99. r1: 20070. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 350, DECODE, PC: 28 r0: 99. r1: 20070. r2: 10. r3: 7. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 351, REM, PC: 28 r0: 99. r1: 20070. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 352, FETCH, PC: 32 r0: 99. r1: 20070. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 353, DECODE, PC: 32 r0: 99. r1: 20070. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 354, ADD, PC: 32 r0: 99. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 355, FETCH, PC: 36 r0: 99. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 356, DECODE, PC: 36 r0: 99. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 357, DIV, PC: 36 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 358, FETCH, PC: 40 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 359, DECODE, PC: 40 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 360, J, PC: 16 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 361, FETCH, PC: 20 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 362, DECODE, PC: 20 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 363, BEQ, PC: 20 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 364, FETCH, PC: 24 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 365, DECODE, PC: 24 r0: 9. r1: 20079. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 366, MUL, PC: 24 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 367, FETCH, PC: 28 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 368, DECODE, PC: 28 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 369, REM, PC: 28 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 370, FETCH, PC: 32 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 371, DECODE, PC: 32 r0: 9. r1: 200790. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 372, ADD, PC: 32 r0: 9. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 373, FETCH, PC: 36 r0: 9. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 374, DECODE, PC: 36 r0: 9. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 375, DIV, PC: 36 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 376, FETCH, PC: 40 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 377, DECODE, PC: 40 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 378, J, PC: 16 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 379, FETCH, PC: 20 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 380, DECODE, PC: 20 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 381, BEQ, PC: 40 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 382, FETCH, PC: 44 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 383, DECODE, PC: 44 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 384, LW_1, PC: 44 r0: 0. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 385, LW_2, PC: 44 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 386, FETCH, PC: 48 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 387, DECODE, PC: 48 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 388, BEQ, PC: 48 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 389, FETCH, PC: 52 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 390, DECODE, PC: 52 r0: 997002. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 391, ADDI, PC: 52 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 392, FETCH, PC: 56 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 393, DECODE, PC: 56 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 394, SW_1, PC: 56 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 395, SW_2, PC: 56 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 396, FETCH, PC: 60 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 397, DECODE, PC: 60 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 398, JR, PC: 140 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 399, FETCH, PC: 144 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 400, DECODE, PC: 144 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 401, LW_1, PC: 144 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 402, LW_2, PC: 144 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 403, FETCH, PC: 148 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 404, DECODE, PC: 148 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 405, LW_1, PC: 148 r0: 1. r1: 200799. r2: 10. r3: 9. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 406, LW_2, PC: 148 r0: 1. r1: 200799. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 407, FETCH, PC: 152 r0: 1. r1: 200799. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 408, DECODE, PC: 152 r0: 1. r1: 200799. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 409, LW_1, PC: 152 r0: 1. r1: 200799. r2: 10. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 410, LW_2, PC: 152 r0: 1. r1: 200799. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 411, FETCH, PC: 156 r0: 1. r1: 200799. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 412, DECODE, PC: 156 r0: 1. r1: 200799. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 413, LW_1, PC: 156 r0: 1. r1: 200799. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 414, LW_2, PC: 156 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 415, FETCH, PC: 160 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 416, DECODE, PC: 160 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 417, ADDI, PC: 160 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 418, FETCH, PC: 164 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 419, DECODE, PC: 164 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 420, BNE, PC: 176 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 421, FETCH, PC: 180 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 422, DECODE, PC: 180 r0: 1. r1: 999. r2: 998. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 423, ADDI, PC: 180 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 424, FETCH, PC: 184 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 425, DECODE, PC: 184 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 426, J, PC: 104 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 427, FETCH, PC: 108 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 428, DECODE, PC: 108 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 429, BLE, PC: 108 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 430, FETCH, PC: 112 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 431, DECODE, PC: 112 r0: 1. r1: 999. r2: 997. r3: 99. r4: 997002. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 432, MUL, PC: 112 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 433, FETCH, PC: 116 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 434, DECODE, PC: 116 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 435, ADDI, PC: 116 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 436, FETCH, PC: 120 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 437, DECODE, PC: 120 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 438, SW_1, PC: 120 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 439, SW_2, PC: 120 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 440, FETCH, PC: 124 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 441, DECODE, PC: 124 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 442, SW_1, PC: 124 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 443, SW_2, PC: 124 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 444, FETCH, PC: 128 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 445, DECODE, PC: 128 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 446, SW_1, PC: 128 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 447, SW_2, PC: 128 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 448, FETCH, PC: 132 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 449, DECODE, PC: 132 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 450, MV, PC: 132 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 451, FETCH, PC: 136 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 452, DECODE, PC: 136 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 453, SW_1, PC: 136 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 454, SW_2, PC: 136 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 455, FETCH, PC: 140 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 456, DECODE, PC: 140 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 457, JAL, PC: 140 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 458, J, PC: 4 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 459, FETCH, PC: 8 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 460, DECODE, PC: 8 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 461, LW_1, PC: 8 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 462, LW_2, PC: 8 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 463, FETCH, PC: 12 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 464, DECODE, PC: 12 r0: 996003. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 465, MV, PC: 12 r0: 996003. r1: 0. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 466, FETCH, PC: 16 r0: 996003. r1: 0. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 467, DECODE, PC: 16 r0: 996003. r1: 0. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 468, ADDI, PC: 16 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 469, FETCH, PC: 20 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 470, DECODE, PC: 20 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 471, BEQ, PC: 20 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 472, FETCH, PC: 24 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 473, DECODE, PC: 24 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 474, MUL, PC: 24 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 475, FETCH, PC: 28 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 476, DECODE, PC: 28 r0: 996003. r1: 0. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 477, REM, PC: 28 r0: 996003. r1: 0. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 478, FETCH, PC: 32 r0: 996003. r1: 0. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 479, DECODE, PC: 32 r0: 996003. r1: 0. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 480, ADD, PC: 32 r0: 996003. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 481, FETCH, PC: 36 r0: 996003. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 482, DECODE, PC: 36 r0: 996003. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 483, DIV, PC: 36 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 484, FETCH, PC: 40 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 485, DECODE, PC: 40 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 486, J, PC: 16 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 487, FETCH, PC: 20 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 488, DECODE, PC: 20 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 489, BEQ, PC: 20 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 490, FETCH, PC: 24 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 491, DECODE, PC: 24 r0: 99600. r1: 3. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 492, MUL, PC: 24 r0: 99600. r1: 30. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 493, FETCH, PC: 28 r0: 99600. r1: 30. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 494, DECODE, PC: 28 r0: 99600. r1: 30. r2: 10. r3: 3. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 495, REM, PC: 28 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 496, FETCH, PC: 32 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 497, DECODE, PC: 32 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 498, ADD, PC: 32 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 499, FETCH, PC: 36 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 500, DECODE, PC: 36 r0: 99600. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 501, DIV, PC: 36 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 502, FETCH, PC: 40 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 503, DECODE, PC: 40 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 504, J, PC: 16 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 505, FETCH, PC: 20 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 506, DECODE, PC: 20 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 507, BEQ, PC: 20 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 508, FETCH, PC: 24 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 509, DECODE, PC: 24 r0: 9960. r1: 30. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 510, MUL, PC: 24 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 511, FETCH, PC: 28 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 512, DECODE, PC: 28 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 513, REM, PC: 28 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 514, FETCH, PC: 32 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 515, DECODE, PC: 32 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 516, ADD, PC: 32 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 517, FETCH, PC: 36 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 518, DECODE, PC: 36 r0: 9960. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 519, DIV, PC: 36 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 520, FETCH, PC: 40 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 521, DECODE, PC: 40 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 522, J, PC: 16 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 523, FETCH, PC: 20 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 524, DECODE, PC: 20 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 525, BEQ, PC: 20 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 526, FETCH, PC: 24 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 527, DECODE, PC: 24 r0: 996. r1: 300. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 528, MUL, PC: 24 r0: 996. r1: 3000. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 529, FETCH, PC: 28 r0: 996. r1: 3000. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 530, DECODE, PC: 28 r0: 996. r1: 3000. r2: 10. r3: 0. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 531, REM, PC: 28 r0: 996. r1: 3000. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 532, FETCH, PC: 32 r0: 996. r1: 3000. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 533, DECODE, PC: 32 r0: 996. r1: 3000. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 534, ADD, PC: 32 r0: 996. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 535, FETCH, PC: 36 r0: 996. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 536, DECODE, PC: 36 r0: 996. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 537, DIV, PC: 36 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 538, FETCH, PC: 40 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 539, DECODE, PC: 40 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 540, J, PC: 16 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 541, FETCH, PC: 20 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 542, DECODE, PC: 20 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 543, BEQ, PC: 20 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 544, FETCH, PC: 24 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 545, DECODE, PC: 24 r0: 99. r1: 3006. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 546, MUL, PC: 24 r0: 99. r1: 30060. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 547, FETCH, PC: 28 r0: 99. r1: 30060. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 548, DECODE, PC: 28 r0: 99. r1: 30060. r2: 10. r3: 6. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 549, REM, PC: 28 r0: 99. r1: 30060. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 550, FETCH, PC: 32 r0: 99. r1: 30060. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 551, DECODE, PC: 32 r0: 99. r1: 30060. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 552, ADD, PC: 32 r0: 99. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 553, FETCH, PC: 36 r0: 99. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 554, DECODE, PC: 36 r0: 99. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 555, DIV, PC: 36 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 556, FETCH, PC: 40 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 557, DECODE, PC: 40 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 558, J, PC: 16 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 559, FETCH, PC: 20 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 560, DECODE, PC: 20 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 561, BEQ, PC: 20 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 562, FETCH, PC: 24 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 563, DECODE, PC: 24 r0: 9. r1: 30069. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 564, MUL, PC: 24 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 565, FETCH, PC: 28 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 566, DECODE, PC: 28 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 567, REM, PC: 28 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 568, FETCH, PC: 32 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 569, DECODE, PC: 32 r0: 9. r1: 300690. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 570, ADD, PC: 32 r0: 9. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 571, FETCH, PC: 36 r0: 9. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 572, DECODE, PC: 36 r0: 9. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 573, DIV, PC: 36 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 574, FETCH, PC: 40 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 575, DECODE, PC: 40 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 576, J, PC: 16 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 577, FETCH, PC: 20 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 578, DECODE, PC: 20 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 579, BEQ, PC: 40 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 580, FETCH, PC: 44 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 581, DECODE, PC: 44 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 582, LW_1, PC: 44 r0: 0. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 583, LW_2, PC: 44 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 584, FETCH, PC: 48 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 585, DECODE, PC: 48 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 586, BEQ, PC: 48 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 587, FETCH, PC: 52 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 588, DECODE, PC: 52 r0: 996003. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 589, ADDI, PC: 52 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 590, FETCH, PC: 56 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 591, DECODE, PC: 56 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 592, SW_1, PC: 56 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 593, SW_2, PC: 56 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 594, FETCH, PC: 60 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 595, DECODE, PC: 60 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 596, JR, PC: 140 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 597, FETCH, PC: 144 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 598, DECODE, PC: 144 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 599, LW_1, PC: 144 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 600, LW_2, PC: 144 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 601, FETCH, PC: 148 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 602, DECODE, PC: 148 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 603, LW_1, PC: 148 r0: 1. r1: 300699. r2: 10. r3: 9. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 604, LW_2, PC: 148 r0: 1. r1: 300699. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 605, FETCH, PC: 152 r0: 1. r1: 300699. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 606, DECODE, PC: 152 r0: 1. r1: 300699. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 607, LW_1, PC: 152 r0: 1. r1: 300699. r2: 10. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 608, LW_2, PC: 152 r0: 1. r1: 300699. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 609, FETCH, PC: 156 r0: 1. r1: 300699. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 610, DECODE, PC: 156 r0: 1. r1: 300699. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 611, LW_1, PC: 156 r0: 1. r1: 300699. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 612, LW_2, PC: 156 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 613, FETCH, PC: 160 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 614, DECODE, PC: 160 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 615, ADDI, PC: 160 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 616, FETCH, PC: 164 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 617, DECODE, PC: 164 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 618, BNE, PC: 176 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 619, FETCH, PC: 180 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 620, DECODE, PC: 180 r0: 1. r1: 999. r2: 997. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 621, ADDI, PC: 180 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 622, FETCH, PC: 184 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 623, DECODE, PC: 184 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 624, J, PC: 104 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 625, FETCH, PC: 108 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 626, DECODE, PC: 108 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 627, BLE, PC: 108 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 628, FETCH, PC: 112 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 629, DECODE, PC: 112 r0: 1. r1: 999. r2: 996. r3: 99. r4: 996003. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 630, MUL, PC: 112 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 631, FETCH, PC: 116 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 632, DECODE, PC: 116 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 633, ADDI, PC: 116 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 634, FETCH, PC: 120 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 635, DECODE, PC: 120 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 636, SW_1, PC: 120 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 637, SW_2, PC: 120 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 638, FETCH, PC: 124 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 639, DECODE, PC: 124 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 640, SW_1, PC: 124 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 641, SW_2, PC: 124 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 642, FETCH, PC: 128 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 643, DECODE, PC: 128 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 644, SW_1, PC: 128 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 645, SW_2, PC: 128 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 646, FETCH, PC: 132 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 647, DECODE, PC: 132 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 648, MV, PC: 132 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 649, FETCH, PC: 136 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 650, DECODE, PC: 136 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 651, SW_1, PC: 136 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 652, SW_2, PC: 136 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 653, FETCH, PC: 140 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 654, DECODE, PC: 140 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 655, JAL, PC: 140 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 656, J, PC: 4 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 657, FETCH, PC: 8 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 658, DECODE, PC: 8 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 659, LW_1, PC: 8 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 660, LW_2, PC: 8 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 661, FETCH, PC: 12 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 662, DECODE, PC: 12 r0: 995004. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 663, MV, PC: 12 r0: 995004. r1: 0. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 664, FETCH, PC: 16 r0: 995004. r1: 0. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 665, DECODE, PC: 16 r0: 995004. r1: 0. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 666, ADDI, PC: 16 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 667, FETCH, PC: 20 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 668, DECODE, PC: 20 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 669, BEQ, PC: 20 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 670, FETCH, PC: 24 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 671, DECODE, PC: 24 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 672, MUL, PC: 24 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 673, FETCH, PC: 28 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 674, DECODE, PC: 28 r0: 995004. r1: 0. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 675, REM, PC: 28 r0: 995004. r1: 0. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 676, FETCH, PC: 32 r0: 995004. r1: 0. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 677, DECODE, PC: 32 r0: 995004. r1: 0. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 678, ADD, PC: 32 r0: 995004. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 679, FETCH, PC: 36 r0: 995004. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 680, DECODE, PC: 36 r0: 995004. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 681, DIV, PC: 36 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 682, FETCH, PC: 40 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 683, DECODE, PC: 40 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 684, J, PC: 16 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 685, FETCH, PC: 20 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 686, DECODE, PC: 20 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 687, BEQ, PC: 20 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 688, FETCH, PC: 24 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 689, DECODE, PC: 24 r0: 99500. r1: 4. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 690, MUL, PC: 24 r0: 99500. r1: 40. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 691, FETCH, PC: 28 r0: 99500. r1: 40. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 692, DECODE, PC: 28 r0: 99500. r1: 40. r2: 10. r3: 4. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 693, REM, PC: 28 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 694, FETCH, PC: 32 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 695, DECODE, PC: 32 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 696, ADD, PC: 32 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 697, FETCH, PC: 36 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 698, DECODE, PC: 36 r0: 99500. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 699, DIV, PC: 36 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 700, FETCH, PC: 40 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 701, DECODE, PC: 40 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 702, J, PC: 16 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 703, FETCH, PC: 20 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 704, DECODE, PC: 20 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 705, BEQ, PC: 20 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 706, FETCH, PC: 24 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 707, DECODE, PC: 24 r0: 9950. r1: 40. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 708, MUL, PC: 24 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 709, FETCH, PC: 28 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 710, DECODE, PC: 28 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 711, REM, PC: 28 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 712, FETCH, PC: 32 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 713, DECODE, PC: 32 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 714, ADD, PC: 32 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 715, FETCH, PC: 36 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 716, DECODE, PC: 36 r0: 9950. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 717, DIV, PC: 36 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 718, FETCH, PC: 40 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 719, DECODE, PC: 40 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 720, J, PC: 16 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 721, FETCH, PC: 20 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 722, DECODE, PC: 20 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 723, BEQ, PC: 20 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 724, FETCH, PC: 24 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 725, DECODE, PC: 24 r0: 995. r1: 400. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 726, MUL, PC: 24 r0: 995. r1: 4000. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 727, FETCH, PC: 28 r0: 995. r1: 4000. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 728, DECODE, PC: 28 r0: 995. r1: 4000. r2: 10. r3: 0. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 729, REM, PC: 28 r0: 995. r1: 4000. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 730, FETCH, PC: 32 r0: 995. r1: 4000. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 731, DECODE, PC: 32 r0: 995. r1: 4000. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 732, ADD, PC: 32 r0: 995. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 733, FETCH, PC: 36 r0: 995. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 734, DECODE, PC: 36 r0: 995. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 735, DIV, PC: 36 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 736, FETCH, PC: 40 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 737, DECODE, PC: 40 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 738, J, PC: 16 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 739, FETCH, PC: 20 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 740, DECODE, PC: 20 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 741, BEQ, PC: 20 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 742, FETCH, PC: 24 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 743, DECODE, PC: 24 r0: 99. r1: 4005. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 744, MUL, PC: 24 r0: 99. r1: 40050. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 745, FETCH, PC: 28 r0: 99. r1: 40050. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 746, DECODE, PC: 28 r0: 99. r1: 40050. r2: 10. r3: 5. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 747, REM, PC: 28 r0: 99. r1: 40050. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 748, FETCH, PC: 32 r0: 99. r1: 40050. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 749, DECODE, PC: 32 r0: 99. r1: 40050. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 750, ADD, PC: 32 r0: 99. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 751, FETCH, PC: 36 r0: 99. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 752, DECODE, PC: 36 r0: 99. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 753, DIV, PC: 36 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 754, FETCH, PC: 40 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 755, DECODE, PC: 40 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 756, J, PC: 16 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 757, FETCH, PC: 20 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 758, DECODE, PC: 20 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 759, BEQ, PC: 20 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 760, FETCH, PC: 24 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 761, DECODE, PC: 24 r0: 9. r1: 40059. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 762, MUL, PC: 24 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 763, FETCH, PC: 28 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 764, DECODE, PC: 28 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 765, REM, PC: 28 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 766, FETCH, PC: 32 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 767, DECODE, PC: 32 r0: 9. r1: 400590. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 768, ADD, PC: 32 r0: 9. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 769, FETCH, PC: 36 r0: 9. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 770, DECODE, PC: 36 r0: 9. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 771, DIV, PC: 36 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 772, FETCH, PC: 40 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 773, DECODE, PC: 40 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 774, J, PC: 16 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 775, FETCH, PC: 20 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 776, DECODE, PC: 20 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 777, BEQ, PC: 40 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 778, FETCH, PC: 44 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 779, DECODE, PC: 44 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 780, LW_1, PC: 44 r0: 0. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 781, LW_2, PC: 44 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 782, FETCH, PC: 48 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 783, DECODE, PC: 48 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 784, BEQ, PC: 48 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 785, FETCH, PC: 52 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 786, DECODE, PC: 52 r0: 995004. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 787, ADDI, PC: 52 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 788, FETCH, PC: 56 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 789, DECODE, PC: 56 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 790, SW_1, PC: 56 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 791, SW_2, PC: 56 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 792, FETCH, PC: 60 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 793, DECODE, PC: 60 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 794, JR, PC: 140 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 795, FETCH, PC: 144 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 796, DECODE, PC: 144 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 797, LW_1, PC: 144 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 798, LW_2, PC: 144 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 799, FETCH, PC: 148 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 800, DECODE, PC: 148 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 801, LW_1, PC: 148 r0: 1. r1: 400599. r2: 10. r3: 9. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 802, LW_2, PC: 148 r0: 1. r1: 400599. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 803, FETCH, PC: 152 r0: 1. r1: 400599. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 804, DECODE, PC: 152 r0: 1. r1: 400599. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 805, LW_1, PC: 152 r0: 1. r1: 400599. r2: 10. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 806, LW_2, PC: 152 r0: 1. r1: 400599. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 807, FETCH, PC: 156 r0: 1. r1: 400599. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 808, DECODE, PC: 156 r0: 1. r1: 400599. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 809, LW_1, PC: 156 r0: 1. r1: 400599. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 810, LW_2, PC: 156 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 811, FETCH, PC: 160 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 812, DECODE, PC: 160 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 813, ADDI, PC: 160 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 814, FETCH, PC: 164 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 815, DECODE, PC: 164 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 816, BNE, PC: 176 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 817, FETCH, PC: 180 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 818, DECODE, PC: 180 r0: 1. r1: 999. r2: 996. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 819, ADDI, PC: 180 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 820, FETCH, PC: 184 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 821, DECODE, PC: 184 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 822, J, PC: 104 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 823, FETCH, PC: 108 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 824, DECODE, PC: 108 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 825, BLE, PC: 108 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 826, FETCH, PC: 112 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 827, DECODE, PC: 112 r0: 1. r1: 999. r2: 995. r3: 99. r4: 995004. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 828, MUL, PC: 112 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 829, FETCH, PC: 116 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 830, DECODE, PC: 116 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 831, ADDI, PC: 116 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 832, FETCH, PC: 120 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 833, DECODE, PC: 120 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 834, SW_1, PC: 120 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 835, SW_2, PC: 120 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 836, FETCH, PC: 124 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 837, DECODE, PC: 124 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 838, SW_1, PC: 124 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 839, SW_2, PC: 124 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 840, FETCH, PC: 128 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 841, DECODE, PC: 128 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 842, SW_1, PC: 128 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 843, SW_2, PC: 128 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 844, FETCH, PC: 132 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 845, DECODE, PC: 132 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 846, MV, PC: 132 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 847, FETCH, PC: 136 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 848, DECODE, PC: 136 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 849, SW_1, PC: 136 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 850, SW_2, PC: 136 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 851, FETCH, PC: 140 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 852, DECODE, PC: 140 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 853, JAL, PC: 140 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 854, J, PC: 4 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 855, FETCH, PC: 8 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 856, DECODE, PC: 8 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 857, LW_1, PC: 8 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 858, LW_2, PC: 8 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 859, FETCH, PC: 12 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 860, DECODE, PC: 12 r0: 994005. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 861, MV, PC: 12 r0: 994005. r1: 0. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 862, FETCH, PC: 16 r0: 994005. r1: 0. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 863, DECODE, PC: 16 r0: 994005. r1: 0. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 864, ADDI, PC: 16 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 865, FETCH, PC: 20 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 866, DECODE, PC: 20 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 867, BEQ, PC: 20 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 868, FETCH, PC: 24 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 869, DECODE, PC: 24 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 870, MUL, PC: 24 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 871, FETCH, PC: 28 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 872, DECODE, PC: 28 r0: 994005. r1: 0. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 873, REM, PC: 28 r0: 994005. r1: 0. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 874, FETCH, PC: 32 r0: 994005. r1: 0. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 875, DECODE, PC: 32 r0: 994005. r1: 0. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 876, ADD, PC: 32 r0: 994005. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 877, FETCH, PC: 36 r0: 994005. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 878, DECODE, PC: 36 r0: 994005. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 879, DIV, PC: 36 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 880, FETCH, PC: 40 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 881, DECODE, PC: 40 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 882, J, PC: 16 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 883, FETCH, PC: 20 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 884, DECODE, PC: 20 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 885, BEQ, PC: 20 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 886, FETCH, PC: 24 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 887, DECODE, PC: 24 r0: 99400. r1: 5. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 888, MUL, PC: 24 r0: 99400. r1: 50. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 889, FETCH, PC: 28 r0: 99400. r1: 50. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 890, DECODE, PC: 28 r0: 99400. r1: 50. r2: 10. r3: 5. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 891, REM, PC: 28 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 892, FETCH, PC: 32 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 893, DECODE, PC: 32 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 894, ADD, PC: 32 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 895, FETCH, PC: 36 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 896, DECODE, PC: 36 r0: 99400. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 897, DIV, PC: 36 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 898, FETCH, PC: 40 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 899, DECODE, PC: 40 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 900, J, PC: 16 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 901, FETCH, PC: 20 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 902, DECODE, PC: 20 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 903, BEQ, PC: 20 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 904, FETCH, PC: 24 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 905, DECODE, PC: 24 r0: 9940. r1: 50. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 906, MUL, PC: 24 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 907, FETCH, PC: 28 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 908, DECODE, PC: 28 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 909, REM, PC: 28 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 910, FETCH, PC: 32 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 911, DECODE, PC: 32 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 912, ADD, PC: 32 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 913, FETCH, PC: 36 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 914, DECODE, PC: 36 r0: 9940. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 915, DIV, PC: 36 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 916, FETCH, PC: 40 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 917, DECODE, PC: 40 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 918, J, PC: 16 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 919, FETCH, PC: 20 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 920, DECODE, PC: 20 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 921, BEQ, PC: 20 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 922, FETCH, PC: 24 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 923, DECODE, PC: 24 r0: 994. r1: 500. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 924, MUL, PC: 24 r0: 994. r1: 5000. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 925, FETCH, PC: 28 r0: 994. r1: 5000. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 926, DECODE, PC: 28 r0: 994. r1: 5000. r2: 10. r3: 0. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 927, REM, PC: 28 r0: 994. r1: 5000. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 928, FETCH, PC: 32 r0: 994. r1: 5000. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 929, DECODE, PC: 32 r0: 994. r1: 5000. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 930, ADD, PC: 32 r0: 994. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 931, FETCH, PC: 36 r0: 994. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 932, DECODE, PC: 36 r0: 994. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 933, DIV, PC: 36 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 934, FETCH, PC: 40 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 935, DECODE, PC: 40 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 936, J, PC: 16 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 937, FETCH, PC: 20 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 938, DECODE, PC: 20 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 939, BEQ, PC: 20 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 940, FETCH, PC: 24 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 941, DECODE, PC: 24 r0: 99. r1: 5004. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 942, MUL, PC: 24 r0: 99. r1: 50040. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 943, FETCH, PC: 28 r0: 99. r1: 50040. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 944, DECODE, PC: 28 r0: 99. r1: 50040. r2: 10. r3: 4. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 945, REM, PC: 28 r0: 99. r1: 50040. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 946, FETCH, PC: 32 r0: 99. r1: 50040. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 947, DECODE, PC: 32 r0: 99. r1: 50040. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 948, ADD, PC: 32 r0: 99. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 949, FETCH, PC: 36 r0: 99. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 950, DECODE, PC: 36 r0: 99. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 951, DIV, PC: 36 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 952, FETCH, PC: 40 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 953, DECODE, PC: 40 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 954, J, PC: 16 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 955, FETCH, PC: 20 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 956, DECODE, PC: 20 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 957, BEQ, PC: 20 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 958, FETCH, PC: 24 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 959, DECODE, PC: 24 r0: 9. r1: 50049. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 960, MUL, PC: 24 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 961, FETCH, PC: 28 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 962, DECODE, PC: 28 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 963, REM, PC: 28 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 964, FETCH, PC: 32 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 965, DECODE, PC: 32 r0: 9. r1: 500490. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 966, ADD, PC: 32 r0: 9. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 967, FETCH, PC: 36 r0: 9. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 968, DECODE, PC: 36 r0: 9. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 969, DIV, PC: 36 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 970, FETCH, PC: 40 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 971, DECODE, PC: 40 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 972, J, PC: 16 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 973, FETCH, PC: 20 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 974, DECODE, PC: 20 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 975, BEQ, PC: 40 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 976, FETCH, PC: 44 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 977, DECODE, PC: 44 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 978, LW_1, PC: 44 r0: 0. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 979, LW_2, PC: 44 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 980, FETCH, PC: 48 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 981, DECODE, PC: 48 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 982, BEQ, PC: 48 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 983, FETCH, PC: 52 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 984, DECODE, PC: 52 r0: 994005. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 985, ADDI, PC: 52 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 986, FETCH, PC: 56 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 987, DECODE, PC: 56 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 988, SW_1, PC: 56 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 989, SW_2, PC: 56 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 990, FETCH, PC: 60 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 991, DECODE, PC: 60 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 992, JR, PC: 140 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 993, FETCH, PC: 144 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 994, DECODE, PC: 144 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 995, LW_1, PC: 144 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 996, LW_2, PC: 144 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 997, FETCH, PC: 148 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 998, DECODE, PC: 148 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 999, LW_1, PC: 148 r0: 1. r1: 500499. r2: 10. r3: 9. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1000, LW_2, PC: 148 r0: 1. r1: 500499. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1001, FETCH, PC: 152 r0: 1. r1: 500499. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1002, DECODE, PC: 152 r0: 1. r1: 500499. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1003, LW_1, PC: 152 r0: 1. r1: 500499. r2: 10. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1004, LW_2, PC: 152 r0: 1. r1: 500499. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1005, FETCH, PC: 156 r0: 1. r1: 500499. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1006, DECODE, PC: 156 r0: 1. r1: 500499. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1007, LW_1, PC: 156 r0: 1. r1: 500499. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1008, LW_2, PC: 156 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1009, FETCH, PC: 160 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1010, DECODE, PC: 160 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1011, ADDI, PC: 160 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1012, FETCH, PC: 164 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1013, DECODE, PC: 164 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1014, BNE, PC: 176 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1015, FETCH, PC: 180 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1016, DECODE, PC: 180 r0: 1. r1: 999. r2: 995. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1017, ADDI, PC: 180 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1018, FETCH, PC: 184 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1019, DECODE, PC: 184 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1020, J, PC: 104 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1021, FETCH, PC: 108 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1022, DECODE, PC: 108 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1023, BLE, PC: 108 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1024, FETCH, PC: 112 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1025, DECODE, PC: 112 r0: 1. r1: 999. r2: 994. r3: 99. r4: 994005. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1026, MUL, PC: 112 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1027, FETCH, PC: 116 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1028, DECODE, PC: 116 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 1000, ar: 996
+    DEBUG   machine:debug_output  TICK: 1029, ADDI, PC: 116 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1030, FETCH, PC: 120 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1031, DECODE, PC: 120 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1032, SW_1, PC: 120 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1033, SW_2, PC: 120 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1034, FETCH, PC: 124 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1035, DECODE, PC: 124 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 996
+    DEBUG   machine:debug_output  TICK: 1036, SW_1, PC: 124 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1037, SW_2, PC: 124 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1038, FETCH, PC: 128 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1039, DECODE, PC: 128 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 992
+    DEBUG   machine:debug_output  TICK: 1040, SW_1, PC: 128 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1041, SW_2, PC: 128 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1042, FETCH, PC: 132 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1043, DECODE, PC: 132 r0: 1. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1044, MV, PC: 132 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1045, FETCH, PC: 136 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1046, DECODE, PC: 136 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 988
+    DEBUG   machine:debug_output  TICK: 1047, SW_1, PC: 136 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1048, SW_2, PC: 136 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1049, FETCH, PC: 140 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1050, DECODE, PC: 140 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1051, JAL, PC: 140 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1052, J, PC: 4 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1053, FETCH, PC: 8 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1054, DECODE, PC: 8 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1055, LW_1, PC: 8 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1056, LW_2, PC: 8 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1057, FETCH, PC: 12 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1058, DECODE, PC: 12 r0: 993006. r1: 999. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1059, MV, PC: 12 r0: 993006. r1: 0. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1060, FETCH, PC: 16 r0: 993006. r1: 0. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1061, DECODE, PC: 16 r0: 993006. r1: 0. r2: 994. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1062, ADDI, PC: 16 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1063, FETCH, PC: 20 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1064, DECODE, PC: 20 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1065, BEQ, PC: 20 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1066, FETCH, PC: 24 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1067, DECODE, PC: 24 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1068, MUL, PC: 24 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1069, FETCH, PC: 28 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1070, DECODE, PC: 28 r0: 993006. r1: 0. r2: 10. r3: 99. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1071, REM, PC: 28 r0: 993006. r1: 0. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1072, FETCH, PC: 32 r0: 993006. r1: 0. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1073, DECODE, PC: 32 r0: 993006. r1: 0. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1074, ADD, PC: 32 r0: 993006. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1075, FETCH, PC: 36 r0: 993006. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1076, DECODE, PC: 36 r0: 993006. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1077, DIV, PC: 36 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1078, FETCH, PC: 40 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1079, DECODE, PC: 40 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1080, J, PC: 16 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1081, FETCH, PC: 20 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1082, DECODE, PC: 20 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1083, BEQ, PC: 20 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1084, FETCH, PC: 24 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1085, DECODE, PC: 24 r0: 99300. r1: 6. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1086, MUL, PC: 24 r0: 99300. r1: 60. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1087, FETCH, PC: 28 r0: 99300. r1: 60. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1088, DECODE, PC: 28 r0: 99300. r1: 60. r2: 10. r3: 6. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1089, REM, PC: 28 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1090, FETCH, PC: 32 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1091, DECODE, PC: 32 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1092, ADD, PC: 32 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1093, FETCH, PC: 36 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1094, DECODE, PC: 36 r0: 99300. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1095, DIV, PC: 36 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1096, FETCH, PC: 40 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1097, DECODE, PC: 40 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1098, J, PC: 16 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1099, FETCH, PC: 20 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1100, DECODE, PC: 20 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1101, BEQ, PC: 20 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1102, FETCH, PC: 24 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1103, DECODE, PC: 24 r0: 9930. r1: 60. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1104, MUL, PC: 24 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1105, FETCH, PC: 28 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1106, DECODE, PC: 28 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1107, REM, PC: 28 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1108, FETCH, PC: 32 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1109, DECODE, PC: 32 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1110, ADD, PC: 32 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1111, FETCH, PC: 36 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1112, DECODE, PC: 36 r0: 9930. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1113, DIV, PC: 36 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1114, FETCH, PC: 40 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1115, DECODE, PC: 40 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1116, J, PC: 16 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1117, FETCH, PC: 20 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1118, DECODE, PC: 20 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1119, BEQ, PC: 20 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1120, FETCH, PC: 24 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1121, DECODE, PC: 24 r0: 993. r1: 600. r2: 10. r3: 0. r4: 993006. r5: 0, r6: 140, sp: 984, ar: 984
+    DEBUG   machine:debug_output  TICK: 1122, MUL, P

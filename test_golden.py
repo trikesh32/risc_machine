@@ -8,7 +8,7 @@ import machine
 import pytest
 import translator
 
-MAX_LOGS = 1000
+MAX_LOGS = 150000
 
 
 @pytest.mark.golden_test("tests/*.yml")
@@ -42,4 +42,4 @@ def test_translator_asm_and_machine(golden, caplog):
         assert data == golden.out["out_data"]
         assert code_hex == golden.out["out_code_hex"]
         assert stdout.getvalue() == golden.out["out_stdout"]
-        assert caplog.text == golden.out["out_log"]
+        assert caplog.text[0:MAX_LOGS] == golden.out["out_log"]

@@ -648,7 +648,7 @@ class DataMemoryModule:
 
 def main(program_dump_filename, data_dump_filename, input_file, input_fmt, target_hex=None):
     if input_fmt == "num":
-        input_buffer = list(map(int, open(input_file).readlines()))
+        input_buffer = list(map(lambda x: int(x, 0), open(input_file).readlines()))
     else:
         string = open(input_file).readline()
         if "<none>" in string:

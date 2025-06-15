@@ -189,7 +189,7 @@ class ControlUnit:
         self.program_register = self.program_memory[self.program_counter // 4]
 
     def debug_output(self, microcode_name):
-        logging.debug(f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} " + str(self.data_path) + "\n")
+        logging.debug("%s", f"TICK: {self.tick}, {microcode_name}, PC: {self.program_counter} {self.data_path!s}")
 
     def run_microcode(self):
         while not self.halted:
@@ -635,7 +635,6 @@ class DataMemoryModule:
         if address == self.output_addr:
             self.output_buffer.append(value)
             logging.debug(f"Output << {value}")
-            return
         value_bytes = value.to_bytes(4, byteorder="little")
         self.data_memory[address] = value_bytes[0]
         self.data_memory[address + 1] = value_bytes[1]
@@ -661,8 +660,9 @@ def main(program_dump_filename, data_dump_filename, input_file, input_fmt, targe
     control_unit = ControlUnit(microcode_memory, code, 0x80, 0x84, 1024, input_buffer, LUT)
     control_unit.data_path.data_memory_module.load_dump(get_data_dump(data_dump_filename))
     control_unit.run_microcode()
-    print(control_unit.data_path.data_memory_module.output_buffer)
-    print("".join(map(chr, control_unit.data_path.data_memory_module.output_buffer)))
+    output_buffer = control_unit.data_path.data_memory_module.output_buffer.copy()
+    print(output_buffer)
+    print("".join(map(chr, output_buffer)))
 
 
 if __name__ == "__main__":

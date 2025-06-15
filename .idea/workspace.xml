@@ -4,14 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="добавил первый тест!">
+    <list default="true" id="e206d164-62e3-4257-b8a2-ef4346fa6413" name="Changes" comment="теперь видит тесты">
+      <change afterPath="$PROJECT_DIR$/tests/hello_user.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/golden_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/golden_tests.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/machine.py" beforeDir="false" afterPath="$PROJECT_DIR$/machine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/programs/input.txt" beforeDir="false" afterPath="$PROJECT_DIR$/programs/input.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/programs/test.asm" beforeDir="false" afterPath="$PROJECT_DIR$/programs/test.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_golden.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_golden.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/cat.yml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cat.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/hello_word.yml" beforeDir="false" afterPath="$PROJECT_DIR$/tests/hello_word.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translator.py" beforeDir="false" afterPath="$PROJECT_DIR$/translator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,9 +57,10 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python tests.Python tests in golden_tests.py.executor": "Run",
+    "Python tests.Python tests in test_golden.py.executor": "Run",
     "Python.isa.executor": "Run",
     "Python.machine.executor": "Run",
-    "Python.translator.executor": "Run",
+    "Python.translator.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
@@ -79,7 +82,7 @@
       <recent name="C:\Users\abobus\itmo\learning\comp_archetecture\risc_machine\img" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.machine">
+  <component name="RunManager" selected="Python tests.Python tests in test_golden.py">
     <configuration name="isa" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="risc_machine" />
       <option name="ENV_FILES" value="" />
@@ -149,7 +152,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in golden_tests.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_golden.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="risc_machine" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -161,7 +164,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/golden_tests.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_golden.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
@@ -169,14 +172,14 @@
       <item itemvalue="Python.isa" />
       <item itemvalue="Python.machine" />
       <item itemvalue="Python.translator" />
-      <item itemvalue="Python tests.Python tests in golden_tests.py" />
+      <item itemvalue="Python tests.Python tests in test_golden.py" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.machine" />
-        <item itemvalue="Python.translator" />
-        <item itemvalue="Python tests.Python tests in golden_tests.py" />
+        <item itemvalue="Python tests.Python tests in test_golden.py" />
         <item itemvalue="Python.isa" />
+        <item itemvalue="Python.translator" />
+        <item itemvalue="Python.machine" />
       </list>
     </recent_temporary>
   </component>
@@ -219,7 +222,7 @@
       <workItem from="1749809437953" duration="7000" />
       <workItem from="1749819843072" duration="1000" />
       <workItem from="1749856780134" duration="13087000" />
-      <workItem from="1749872062433" duration="52149000" />
+      <workItem from="1749872062433" duration="61908000" />
     </task>
     <task id="LOCAL-00001" summary="ну, с богом">
       <option name="closed" value="true" />
@@ -405,7 +408,23 @@
       <option name="project" value="LOCAL" />
       <updated>1749959241782</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="добавил второй тест!!!">
+      <option name="closed" value="true" />
+      <created>1749962640336</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1749962640336</updated>
+    </task>
+    <task id="LOCAL-00025" summary="теперь видит тесты">
+      <option name="closed" value="true" />
+      <created>1749962836587</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1749962836587</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -437,12 +456,25 @@
     <MESSAGE value="ага, формат слетел)))" />
     <MESSAGE value="poetry.lock added" />
     <MESSAGE value="добавил первый тест!" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавил первый тест!" />
+    <MESSAGE value="добавил второй тест!!!" />
+    <MESSAGE value="теперь видит тесты" />
+    <option name="LAST_COMMIT_MESSAGE" value="теперь видит тесты" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_golden.py</url>
+          <line>27</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/risc_machine$isa.coverage" NAME="isa Coverage Results" MODIFIED="1749912720581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/risc_machine$translator.coverage" NAME="translator Coverage Results" MODIFIED="1749956612175" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/risc_machine$isa.coverage" NAME="isa Coverage Results" MODIFIED="1749969602714" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/risc_machine$translator.coverage" NAME="translator Coverage Results" MODIFIED="1749963847376" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/risc_machine$machine.coverage" NAME="machine Coverage Results" MODIFIED="1749962256450" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/risc_machine$.coverage" NAME=" Coverage Results" MODIFIED="1749953316451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/risc_machine$.coverage" NAME=" Coverage Results" MODIFIED="1749972469616" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

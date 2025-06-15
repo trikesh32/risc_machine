@@ -191,9 +191,10 @@ def first_run(lines):
 
 
 def _replace_labels(text, labels, offset=0):
-    for label, address in labels.items():
-        if label in text:
-            text = text.replace(label, str(address + offset))
+    sorted_labels = sorted(labels.items(), key=lambda x: len(x[0]), reverse=True)
+    for label, address in sorted_labels:
+        pattern = r"\b" + re.escape(label) + r"\b"
+        text = re.sub(pattern, str(address + offset), text)
     return text
 
 
@@ -361,7 +362,6 @@ def fourth_run(text_dump):
 def main(input_filename, code_filename, data_filename):
     with open(input_filename) as f:
         lines = f.readlines()
-    first_run(lines)
     data_dump, text_dump = first_run(lines)
     text_dump = second_run(text_dump)
     text_dump = third_run(text_dump)

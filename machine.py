@@ -10,7 +10,7 @@ from isa import (
     from_bytes,
     get_data_dump,
     to_hex,
-    to_signed16, to_signed32,
+    to_signed32,
 )
 
 

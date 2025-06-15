@@ -159,6 +159,7 @@ def to_signed16(num):
         return num - 0x10000
     return num
 
+
 def to_signed32(num):
     if num & 0x80000000:
         return num - 0x100000000

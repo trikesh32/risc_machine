@@ -5,25 +5,29 @@ from isa import opcode_to_binary, reg_to_binary
 
 
 class InvalidDataFormatError(ValueError):
-    """Исключение для некорректного формата данных."""
     def __init__(self):
         super().__init__("Некорректный формат данных")
+
 
 class InvalidMacroDefinitionError(ValueError):
     def __init__(self):
         super().__init__("Плохое определение макроса")
 
+
 class InvalidOrgDefinitionError(ValueError):
     def __init__(self):
         super().__init__("Плохое определение .org")
+
 
 class UnknownInstructionError(ValueError):
     def __init__(self, val):
         super().__init__(f"Что такое: {val}")
 
+
 class ZeroWriteError(ValueError):
     def __init__(self):
         super().__init__("Нельзя писать в zero!")
+
 
 def hi(number):
     return (int(number, 0) >> 16) & 0xFFFF
@@ -130,6 +134,7 @@ def _process_label_string(line, data_dump, text_dump, current_text_address, curr
         current_text_address = _process_text_label(line_parts, text_dump, current_text_address)
     return current_data_address, current_text_address
 
+
 def _process_first_run_end(state, current_data_address, current_text_address, text_dump, line):
     if state == 1:
         current_data_address = _process_data_content(line, data_dump, current_data_address)
@@ -137,6 +142,7 @@ def _process_first_run_end(state, current_data_address, current_text_address, te
         text_dump[current_text_address] = line.strip()
         current_text_address += 4
     return current_data_address, current_text_address, text_dump, line
+
 
 def _process_directive(line, state, current_data_address):
     res = False
@@ -155,6 +161,7 @@ def _process_directive(line, state, current_data_address):
         res = True
     return res, state, current_data_address
 
+
 def first_run(lines):
     global data_labels, text_labels, macros
 
@@ -172,13 +179,17 @@ def first_run(lines):
         if res:
             continue
         if ":" in line:
-            current_data_address, current_text_address = _process_label_string(line, data_dump, text_dump, current_text_address, current_data_address, state)
+            current_data_address, current_text_address = _process_label_string(
+                line, data_dump, text_dump, current_text_address, current_data_address, state
+            )
             continue
-        current_data_address, current_text_address, text_dump, line = _process_first_run_end(state, current_data_address, current_text_address, text_dump, line)
+        current_data_address, current_text_address, text_dump, line = _process_first_run_end(
+            state, current_data_address, current_text_address, text_dump, line
+        )
     return data_dump, text_dump
 
 
-def _replace_labels(text, labels, offset = 0):
+def _replace_labels(text, labels, offset=0):
     for label, address in labels.items():
         if label in text:
             text = text.replace(label, str(address + offset))
@@ -200,6 +211,7 @@ def second_run(text_dump):
         instruction = _replace_macros(instruction)
         processed_dump[address] = instruction
     return processed_dump
+
 
 def third_run(text_dump):  # обрабатываем %hi и %lo
     for key, val in text_dump.items():

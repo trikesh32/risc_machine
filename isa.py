@@ -235,7 +235,7 @@ def _parse_instruction_word(word: int) -> dict:
         "rd_bin": (word >> 24) & 0x7,
         "rs1_bin": (word >> 20) & 0xF,
         "rs2_bin": (word >> 16) & 0xF,
-        "k": to_signed16(word & 0xFFFF)
+        "k": to_signed16(word & 0xFFFF),
     }
 
 
@@ -283,7 +283,7 @@ def _build_instruction(fields: dict) -> dict:
         Opcode.BGTU: ["rs1", "rs2", "k"],
         Opcode.BNE: ["rs1", "rs2", "k"],
         Opcode.BEQ: ["rs1", "rs2", "k"],
-        Opcode.HALT: []
+        Opcode.HALT: [],
     }
 
     for field in field_mapping.get(opcode, []):
@@ -302,11 +302,13 @@ def from_bytes(input_file_name: str) -> list:
 
             word = int.from_bytes(bytes_data, "big")
             fields = _parse_instruction_word(word)
-            fields.update({
-                "rd": _get_register(fields["rd_bin"]),
-                "rs1": _get_register(fields["rs1_bin"]),
-                "rs2": _get_register(fields["rs2_bin"])
-            })
+            fields.update(
+                {
+                    "rd": _get_register(fields["rd_bin"]),
+                    "rs1": _get_register(fields["rs1_bin"]),
+                    "rs2": _get_register(fields["rs2_bin"]),
+                }
+            )
 
             instruction = _build_instruction(fields)
             if instruction["opcode"] is not None:

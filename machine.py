@@ -64,7 +64,7 @@ class DataPath:
             ALUModes.AND: lambda: (a & b) & 0xFFFFFFFF,
             ALUModes.OR: lambda: (a | b) & 0xFFFFFFFF,
             ALUModes.XOR: lambda: (a ^ b) & 0xFFFFFFFF,
-            ALUModes.SRA: lambda: (a >> b) & 0xFFFFFFFF
+            ALUModes.SRA: lambda: (a >> b) & 0xFFFFFFFF,
         }
 
         self.res = operations.get(mode, lambda: 0)()
@@ -81,7 +81,7 @@ class DataPath:
             CondModes.GT: lambda: to_signed16(a) > to_signed16(b),
             CondModes.GTU: lambda: a > b,
             CondModes.TRUE: lambda: True,
-            CondModes.FALSE: lambda: False
+            CondModes.FALSE: lambda: False,
         }
 
         condition_func = operations.get(mode)

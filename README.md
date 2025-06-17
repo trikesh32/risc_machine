@@ -365,8 +365,60 @@
 ```text
 Использование: python machine.py <program_dump> <data_dump> <input_file> <input_fmt> (num | str)
 ```
+Пример `program_dump` (в base64):
+gAAAAAEAAAAhEAAEGRAAAAIAAAAiIAAIJIAA/wUAAAAlUAAAHVAAABsgAABrNAAAuDgAFBATAAAiIAABGyAAAGs0AACAAP/oG1AAALg4AAgQEwAAgAD/8AIAAAAiIAAjGyAAACIgAAFrNAAAuDgACBATAACAAP/oEBMAAMgAAAA=
 
+Пример `data_dump` (в base64):
+gAAAAIQAAABXaGF0IGlzIHlvdXIgbmFtZT9cbkhlbGxvLAAhAA==
 
+Пример `imput_file`:
+Alice
+
+Пример выполнения:
+```text
+DEBUG   machine:debug_output  TICK: 1, FETCH, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 2, DECODE, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 3, J, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 4, FETCH, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 5, DECODE, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 6, LUI, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 7, FETCH, PC: 12 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 8, DECODE, PC: 12 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 9, ADDI, PC: 12 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 10, FETCH, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 11, DECODE, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG   machine:debug_output  TICK: 12, LW_1, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 13, LW_2, PC: 16 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 14, FETCH, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 15, DECODE, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 16, LUI, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 17, FETCH, PC: 24 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 18, DECODE, PC: 24 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 19, ADDI, PC: 24 r0: 132. r1: 8. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG   machine:debug_output  TICK: 20, FETCH, PC: 28 r0: 132. r1: 8. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+...
+[87, 104, 97, 116, 32, 105, 115, 32, 121, 111, 117, 114, 32, 110, 97, 109, 101, 63, 92, 110, 72, 101, 108, 108, 111, 44, 65, 108, 105, 99, 101, 33, 0]
+What is your name?\nHello,Alice! 
+```
+
+Описание реализации:
+- `microcoded` - логика выполнения инструкций пишется в микроинструкциях
+- `ControlUnit.run_microcode()` начинает потактовое выполнение микрокода
+
+# Тестирование
+Запустить тестирование
+```text
+poetry run pytest .
+```
+Логика работы тестирования - [test_golden.py](test_golden.py)
+Каталог с тестам - [tests](tests)
+# Тесты
+- `hello_word` - выводит строку "Hello, World!"
+- `hello_username` - печатает приветствие пользователю
+- `cat` - повторяет поток ввода в поток вывода
+- `sort` - принимает поток чисел заканчивающийся нулем, и выводит их отсортированными (0 не выводит)
+- `arithmetic` - принимает два 64 битных числа и складывает/вычитает (в данном тесте вычитает)
+- `euler_el_problem` - находит максимальный палиндром - результат перемножения двух 3х значных чисел 
 # Микрокоманды
 Одна микрокоманда состоит из 25 бит (20 бит под сигналы и 5 бит под mc_const)
 - 24ый бит: `is_halted` - если 1 машина останавливается
@@ -423,3 +475,768 @@
 
 # Модуль памяти данных
 Реализация IO через MMIO работает элементарно, если адрес обращения равен заранее установленному адрессу ввода или вывода, обращения перенаправляются к ним, во всех других случаех работает как память с шириной данных 4 байта   
+
+# Пример использования
+```text
+(.venv) PS C:\Users\abobus\itmo\learning\comp_archetecture\risc_machine> py .\translator.py .\programs\test.asm a.bin b.bin      
+Success
+(.venv) PS C:\Users\abobus\itmo\learning\comp_archetecture\risc_machine> py .\machine.py .\a.bin .\b.bin .\programs\input.txt str
+0 - 80000000 - j 0
+1 - 01000000 - lui r0, 0
+2 - 21100004 - addi r0, r0, 4
+3 - 19100000 - lw r0, 0(r0)
+4 - 02000000 - lui r1, 0
+5 - 22200008 - addi r1, r1, 8
+6 - 248000FF - addi r3, zero, 255
+7 - 05000000 - lui r4, 0
+8 - 25500000 - addi r4, r4, 0
+9 - 1D500000 - lw r4, 0(r4)
+10 - 1B200000 - lw r2, 0(r1)
+11 - 6B340000 - and r2, r2, r3
+12 - B8380014 - beq r2, zero, 20
+13 - 10130000 - sw r2, 0(r0)
+14 - 22200001 - addi r1, r1, 1
+15 - 1B200000 - lw r2, 0(r1)
+16 - 6B340000 - and r2, r2, r3
+17 - 8000FFE8 - j -24
+18 - 1B500000 - lw r2, 0(r4)
+19 - B8380008 - beq r2, zero, 8
+20 - 10130000 - sw r2, 0(r0)
+21 - 8000FFF0 - j -16
+22 - 02000000 - lui r1, 0
+23 - 22200023 - addi r1, r1, 35
+24 - 1B200000 - lw r2, 0(r1)
+25 - 22200001 - addi r1, r1, 1
+26 - 6B340000 - and r2, r2, r3
+27 - B8380008 - beq r2, zero, 8
+28 - 10130000 - sw r2, 0(r0)
+29 - 8000FFE8 - j -24
+30 - 10130000 - sw r2, 0(r0)
+31 - C8000000 - halt
+DEBUG:root:TICK: 1, FETCH, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 2, DECODE, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 3, J, PC: 4 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 4, FETCH, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 5, DECODE, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 6, LUI, PC: 8 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 7, FETCH, PC: 12 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 8, DECODE, PC: 12 r0: 0. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 9, ADDI, PC: 12 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 10, FETCH, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 11, DECODE, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0
+DEBUG:root:TICK: 12, LW_1, PC: 16 r0: 4. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 13, LW_2, PC: 16 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 14, FETCH, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 15, DECODE, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4        
+DEBUG:root:TICK: 16, LUI, PC: 20 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 17, FETCH, PC: 24 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 18, DECODE, PC: 24 r0: 132. r1: 0. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4        
+DEBUG:root:TICK: 19, ADDI, PC: 24 r0: 132. r1: 8. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 20, FETCH, PC: 28 r0: 132. r1: 8. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 21, DECODE, PC: 28 r0: 132. r1: 8. r2: 0. r3: 0. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4        
+DEBUG:root:TICK: 22, ADDI, PC: 28 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4        
+DEBUG:root:TICK: 23, FETCH, PC: 32 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4       
+DEBUG:root:TICK: 24, DECODE, PC: 32 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4      
+DEBUG:root:TICK: 25, LUI, PC: 32 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4
+DEBUG:root:TICK: 26, FETCH, PC: 36 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4       
+DEBUG:root:TICK: 27, DECODE, PC: 36 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4      
+DEBUG:root:TICK: 28, ADDI, PC: 36 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4        
+DEBUG:root:TICK: 29, FETCH, PC: 40 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4       
+DEBUG:root:TICK: 30, DECODE, PC: 40 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 4      
+DEBUG:root:TICK: 31, LW_1, PC: 40 r0: 132. r1: 8. r2: 0. r3: 255. r4: 0. r5: 0, r6: 0, sp: 0, ar: 0        
+DEBUG:root:TICK: 32, LW_2, PC: 40 r0: 132. r1: 8. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 0      
+DEBUG:root:TICK: 33, FETCH, PC: 44 r0: 132. r1: 8. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 0     
+DEBUG:root:TICK: 34, DECODE, PC: 44 r0: 132. r1: 8. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 0    
+DEBUG:root:TICK: 35, LW_1, PC: 44 r0: 132. r1: 8. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8      
+DEBUG:root:TICK: 36, LW_2, PC: 44 r0: 132. r1: 8. r2: 1952540759. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8
+DEBUG:root:TICK: 37, FETCH, PC: 48 r0: 132. r1: 8. r2: 1952540759. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8
+DEBUG:root:TICK: 38, DECODE, PC: 48 r0: 132. r1: 8. r2: 1952540759. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8
+DEBUG:root:TICK: 39, AND, PC: 48 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8      
+DEBUG:root:TICK: 40, FETCH, PC: 52 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8    
+DEBUG:root:TICK: 41, DECODE, PC: 52 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8   
+DEBUG:root:TICK: 42, BEQ, PC: 52 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8      
+DEBUG:root:TICK: 43, FETCH, PC: 56 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8    
+DEBUG:root:TICK: 44, DECODE, PC: 56 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 8   
+DEBUG:root:TICK: 45, SW_1, PC: 56 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:Output << 87
+DEBUG:root:TICK: 46, SW_2, PC: 56 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:TICK: 47, FETCH, PC: 60 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:TICK: 48, DECODE, PC: 60 r0: 132. r1: 8. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 49, ADDI, PC: 60 r0: 132. r1: 9. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:TICK: 50, FETCH, PC: 64 r0: 132. r1: 9. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:TICK: 51, DECODE, PC: 64 r0: 132. r1: 9. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 52, LW_1, PC: 64 r0: 132. r1: 9. r2: 87. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9     
+DEBUG:root:TICK: 53, LW_2, PC: 64 r0: 132. r1: 9. r2: 544498024. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9
+DEBUG:root:TICK: 54, FETCH, PC: 68 r0: 132. r1: 9. r2: 544498024. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9
+DEBUG:root:TICK: 55, DECODE, PC: 68 r0: 132. r1: 9. r2: 544498024. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9
+DEBUG:root:TICK: 56, AND, PC: 68 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9     
+DEBUG:root:TICK: 57, FETCH, PC: 72 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9   
+DEBUG:root:TICK: 58, DECODE, PC: 72 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9  
+DEBUG:root:TICK: 59, J, PC: 48 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9       
+DEBUG:root:TICK: 60, FETCH, PC: 52 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9   
+DEBUG:root:TICK: 61, DECODE, PC: 52 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9  
+DEBUG:root:TICK: 62, BEQ, PC: 52 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9     
+DEBUG:root:TICK: 63, FETCH, PC: 56 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9   
+DEBUG:root:TICK: 64, DECODE, PC: 56 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 9  
+DEBUG:root:TICK: 65, SW_1, PC: 56 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:Output << 104
+DEBUG:root:TICK: 66, SW_2, PC: 56 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:TICK: 67, FETCH, PC: 60 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 68, DECODE, PC: 60 r0: 132. r1: 9. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 69, ADDI, PC: 60 r0: 132. r1: 10. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 70, FETCH, PC: 64 r0: 132. r1: 10. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 71, DECODE, PC: 64 r0: 132. r1: 10. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 72, LW_1, PC: 64 r0: 132. r1: 10. r2: 104. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10  
+DEBUG:root:TICK: 73, LW_2, PC: 64 r0: 132. r1: 10. r2: 1763734625. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10
+DEBUG:root:TICK: 74, FETCH, PC: 68 r0: 132. r1: 10. r2: 1763734625. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10
+DEBUG:root:TICK: 75, DECODE, PC: 68 r0: 132. r1: 10. r2: 1763734625. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10
+DEBUG:root:TICK: 76, AND, PC: 68 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10    
+DEBUG:root:TICK: 77, FETCH, PC: 72 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10  
+DEBUG:root:TICK: 78, DECODE, PC: 72 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10 
+DEBUG:root:TICK: 79, J, PC: 48 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10      
+DEBUG:root:TICK: 80, FETCH, PC: 52 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10  
+DEBUG:root:TICK: 81, DECODE, PC: 52 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10 
+DEBUG:root:TICK: 82, BEQ, PC: 52 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10    
+DEBUG:root:TICK: 83, FETCH, PC: 56 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10  
+DEBUG:root:TICK: 84, DECODE, PC: 56 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 10 
+DEBUG:root:TICK: 85, SW_1, PC: 56 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:Output << 97
+DEBUG:root:TICK: 86, SW_2, PC: 56 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:TICK: 87, FETCH, PC: 60 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 88, DECODE, PC: 60 r0: 132. r1: 10. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 89, ADDI, PC: 60 r0: 132. r1: 11. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132  
+DEBUG:root:TICK: 90, FETCH, PC: 64 r0: 132. r1: 11. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 91, DECODE, PC: 64 r0: 132. r1: 11. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 92, LW_1, PC: 64 r0: 132. r1: 11. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11   
+DEBUG:root:TICK: 93, LW_2, PC: 64 r0: 132. r1: 11. r2: 1936269428. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 94, FETCH, PC: 68 r0: 132. r1: 11. r2: 1936269428. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 95, DECODE, PC: 68 r0: 132. r1: 11. r2: 1936269428. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 96, AND, PC: 68 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11   
+DEBUG:root:TICK: 97, FETCH, PC: 72 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11 
+DEBUG:root:TICK: 98, DECODE, PC: 72 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 99, J, PC: 48 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11     
+DEBUG:root:TICK: 100, FETCH, PC: 52 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 101, DECODE, PC: 52 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 102, BEQ, PC: 52 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11  
+DEBUG:root:TICK: 103, FETCH, PC: 56 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 104, DECODE, PC: 56 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 11
+DEBUG:root:TICK: 105, SW_1, PC: 56 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 116
+DEBUG:root:TICK: 106, SW_2, PC: 56 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 107, FETCH, PC: 60 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 108, DECODE, PC: 60 r0: 132. r1: 11. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 109, ADDI, PC: 60 r0: 132. r1: 12. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 110, FETCH, PC: 64 r0: 132. r1: 12. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 111, DECODE, PC: 64 r0: 132. r1: 12. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 112, LW_1, PC: 64 r0: 132. r1: 12. r2: 116. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12 
+DEBUG:root:TICK: 113, LW_2, PC: 64 r0: 132. r1: 12. r2: 544434464. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 114, FETCH, PC: 68 r0: 132. r1: 12. r2: 544434464. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 115, DECODE, PC: 68 r0: 132. r1: 12. r2: 544434464. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 116, AND, PC: 68 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12   
+DEBUG:root:TICK: 117, FETCH, PC: 72 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12 
+DEBUG:root:TICK: 118, DECODE, PC: 72 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 119, J, PC: 48 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12     
+DEBUG:root:TICK: 120, FETCH, PC: 52 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12 
+DEBUG:root:TICK: 121, DECODE, PC: 52 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 122, BEQ, PC: 52 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12   
+DEBUG:root:TICK: 123, FETCH, PC: 56 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12 
+DEBUG:root:TICK: 124, DECODE, PC: 56 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 12
+DEBUG:root:TICK: 125, SW_1, PC: 56 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 32
+DEBUG:root:TICK: 126, SW_2, PC: 56 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 127, FETCH, PC: 60 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 128, DECODE, PC: 60 r0: 132. r1: 12. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 129, ADDI, PC: 60 r0: 132. r1: 13. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 130, FETCH, PC: 64 r0: 132. r1: 13. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 131, DECODE, PC: 64 r0: 132. r1: 13. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 132, LW_1, PC: 64 r0: 132. r1: 13. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13  
+DEBUG:root:TICK: 133, LW_2, PC: 64 r0: 132. r1: 13. r2: 2032169833. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 134, FETCH, PC: 68 r0: 132. r1: 13. r2: 2032169833. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 135, DECODE, PC: 68 r0: 132. r1: 13. r2: 2032169833. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 136, AND, PC: 68 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13  
+DEBUG:root:TICK: 137, FETCH, PC: 72 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 138, DECODE, PC: 72 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 139, J, PC: 48 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13    
+DEBUG:root:TICK: 140, FETCH, PC: 52 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 141, DECODE, PC: 52 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 142, BEQ, PC: 52 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13  
+DEBUG:root:TICK: 143, FETCH, PC: 56 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 144, DECODE, PC: 56 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 13
+DEBUG:root:TICK: 145, SW_1, PC: 56 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 105
+DEBUG:root:TICK: 146, SW_2, PC: 56 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 147, FETCH, PC: 60 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 148, DECODE, PC: 60 r0: 132. r1: 13. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 149, ADDI, PC: 60 r0: 132. r1: 14. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 150, FETCH, PC: 64 r0: 132. r1: 14. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 151, DECODE, PC: 64 r0: 132. r1: 14. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 152, LW_1, PC: 64 r0: 132. r1: 14. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14 
+DEBUG:root:TICK: 153, LW_2, PC: 64 r0: 132. r1: 14. r2: 1870209139. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 154, FETCH, PC: 68 r0: 132. r1: 14. r2: 1870209139. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 155, DECODE, PC: 68 r0: 132. r1: 14. r2: 1870209139. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 156, AND, PC: 68 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14  
+DEBUG:root:TICK: 157, FETCH, PC: 72 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 158, DECODE, PC: 72 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 159, J, PC: 48 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14    
+DEBUG:root:TICK: 160, FETCH, PC: 52 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 161, DECODE, PC: 52 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 162, BEQ, PC: 52 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14  
+DEBUG:root:TICK: 163, FETCH, PC: 56 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 164, DECODE, PC: 56 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 14
+DEBUG:root:TICK: 165, SW_1, PC: 56 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 115
+DEBUG:root:TICK: 166, SW_2, PC: 56 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 167, FETCH, PC: 60 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 168, DECODE, PC: 60 r0: 132. r1: 14. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 169, ADDI, PC: 60 r0: 132. r1: 15. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 170, FETCH, PC: 64 r0: 132. r1: 15. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 171, DECODE, PC: 64 r0: 132. r1: 15. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 172, LW_1, PC: 64 r0: 132. r1: 15. r2: 115. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15 
+DEBUG:root:TICK: 173, LW_2, PC: 64 r0: 132. r1: 15. r2: 1970239776. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 174, FETCH, PC: 68 r0: 132. r1: 15. r2: 1970239776. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 175, DECODE, PC: 68 r0: 132. r1: 15. r2: 1970239776. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 176, AND, PC: 68 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15   
+DEBUG:root:TICK: 177, FETCH, PC: 72 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15 
+DEBUG:root:TICK: 178, DECODE, PC: 72 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 179, J, PC: 48 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15     
+DEBUG:root:TICK: 180, FETCH, PC: 52 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15 
+DEBUG:root:TICK: 181, DECODE, PC: 52 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 182, BEQ, PC: 52 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15   
+DEBUG:root:TICK: 183, FETCH, PC: 56 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15 
+DEBUG:root:TICK: 184, DECODE, PC: 56 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 15
+DEBUG:root:TICK: 185, SW_1, PC: 56 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 32
+DEBUG:root:TICK: 186, SW_2, PC: 56 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 187, FETCH, PC: 60 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 188, DECODE, PC: 60 r0: 132. r1: 15. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 189, ADDI, PC: 60 r0: 132. r1: 16. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 190, FETCH, PC: 64 r0: 132. r1: 16. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 191, DECODE, PC: 64 r0: 132. r1: 16. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 192, LW_1, PC: 64 r0: 132. r1: 16. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16  
+DEBUG:root:TICK: 193, LW_2, PC: 64 r0: 132. r1: 16. r2: 1920298873. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 194, FETCH, PC: 68 r0: 132. r1: 16. r2: 1920298873. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 195, DECODE, PC: 68 r0: 132. r1: 16. r2: 1920298873. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 196, AND, PC: 68 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16  
+DEBUG:root:TICK: 197, FETCH, PC: 72 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 198, DECODE, PC: 72 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 199, J, PC: 48 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16    
+DEBUG:root:TICK: 200, FETCH, PC: 52 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 201, DECODE, PC: 52 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 202, BEQ, PC: 52 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16  
+DEBUG:root:TICK: 203, FETCH, PC: 56 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 204, DECODE, PC: 56 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 16
+DEBUG:root:TICK: 205, SW_1, PC: 56 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 121
+DEBUG:root:TICK: 206, SW_2, PC: 56 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 207, FETCH, PC: 60 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 208, DECODE, PC: 60 r0: 132. r1: 16. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 209, ADDI, PC: 60 r0: 132. r1: 17. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 210, FETCH, PC: 64 r0: 132. r1: 17. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 211, DECODE, PC: 64 r0: 132. r1: 17. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 212, LW_1, PC: 64 r0: 132. r1: 17. r2: 121. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17 
+DEBUG:root:TICK: 213, LW_2, PC: 64 r0: 132. r1: 17. r2: 544372079. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 214, FETCH, PC: 68 r0: 132. r1: 17. r2: 544372079. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 215, DECODE, PC: 68 r0: 132. r1: 17. r2: 544372079. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 216, AND, PC: 68 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17  
+DEBUG:root:TICK: 217, FETCH, PC: 72 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 218, DECODE, PC: 72 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 219, J, PC: 48 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17    
+DEBUG:root:TICK: 220, FETCH, PC: 52 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 221, DECODE, PC: 52 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 222, BEQ, PC: 52 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17  
+DEBUG:root:TICK: 223, FETCH, PC: 56 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 224, DECODE, PC: 56 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 17
+DEBUG:root:TICK: 225, SW_1, PC: 56 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 111
+DEBUG:root:TICK: 226, SW_2, PC: 56 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 227, FETCH, PC: 60 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 228, DECODE, PC: 60 r0: 132. r1: 17. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 229, ADDI, PC: 60 r0: 132. r1: 18. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 230, FETCH, PC: 64 r0: 132. r1: 18. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 231, DECODE, PC: 64 r0: 132. r1: 18. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 232, LW_1, PC: 64 r0: 132. r1: 18. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18 
+DEBUG:root:TICK: 233, LW_2, PC: 64 r0: 132. r1: 18. r2: 1847620213. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 234, FETCH, PC: 68 r0: 132. r1: 18. r2: 1847620213. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 235, DECODE, PC: 68 r0: 132. r1: 18. r2: 1847620213. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 236, AND, PC: 68 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18  
+DEBUG:root:TICK: 237, FETCH, PC: 72 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 238, DECODE, PC: 72 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 239, J, PC: 48 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18    
+DEBUG:root:TICK: 240, FETCH, PC: 52 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 241, DECODE, PC: 52 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 242, BEQ, PC: 52 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18  
+DEBUG:root:TICK: 243, FETCH, PC: 56 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 244, DECODE, PC: 56 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 18
+DEBUG:root:TICK: 245, SW_1, PC: 56 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 117
+DEBUG:root:TICK: 246, SW_2, PC: 56 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 247, FETCH, PC: 60 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 248, DECODE, PC: 60 r0: 132. r1: 18. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 249, ADDI, PC: 60 r0: 132. r1: 19. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 250, FETCH, PC: 64 r0: 132. r1: 19. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 251, DECODE, PC: 64 r0: 132. r1: 19. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 252, LW_1, PC: 64 r0: 132. r1: 19. r2: 117. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19 
+DEBUG:root:TICK: 253, LW_2, PC: 64 r0: 132. r1: 19. r2: 1634607218. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 254, FETCH, PC: 68 r0: 132. r1: 19. r2: 1634607218. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 255, DECODE, PC: 68 r0: 132. r1: 19. r2: 1634607218. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 256, AND, PC: 68 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19  
+DEBUG:root:TICK: 257, FETCH, PC: 72 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 258, DECODE, PC: 72 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 259, J, PC: 48 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19    
+DEBUG:root:TICK: 260, FETCH, PC: 52 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 261, DECODE, PC: 52 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 262, BEQ, PC: 52 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19  
+DEBUG:root:TICK: 263, FETCH, PC: 56 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 264, DECODE, PC: 56 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 19
+DEBUG:root:TICK: 265, SW_1, PC: 56 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 114
+DEBUG:root:TICK: 266, SW_2, PC: 56 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 267, FETCH, PC: 60 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 268, DECODE, PC: 60 r0: 132. r1: 19. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 269, ADDI, PC: 60 r0: 132. r1: 20. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 270, FETCH, PC: 64 r0: 132. r1: 20. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 271, DECODE, PC: 64 r0: 132. r1: 20. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 272, LW_1, PC: 64 r0: 132. r1: 20. r2: 114. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20 
+DEBUG:root:TICK: 273, LW_2, PC: 64 r0: 132. r1: 20. r2: 1835101728. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 274, FETCH, PC: 68 r0: 132. r1: 20. r2: 1835101728. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 275, DECODE, PC: 68 r0: 132. r1: 20. r2: 1835101728. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 276, AND, PC: 68 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20   
+DEBUG:root:TICK: 277, FETCH, PC: 72 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20 
+DEBUG:root:TICK: 278, DECODE, PC: 72 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 279, J, PC: 48 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20     
+DEBUG:root:TICK: 280, FETCH, PC: 52 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20 
+DEBUG:root:TICK: 281, DECODE, PC: 52 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 282, BEQ, PC: 52 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20   
+DEBUG:root:TICK: 283, FETCH, PC: 56 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20 
+DEBUG:root:TICK: 284, DECODE, PC: 56 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 20
+DEBUG:root:TICK: 285, SW_1, PC: 56 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 32
+DEBUG:root:TICK: 286, SW_2, PC: 56 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 287, FETCH, PC: 60 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 288, DECODE, PC: 60 r0: 132. r1: 20. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 289, ADDI, PC: 60 r0: 132. r1: 21. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 290, FETCH, PC: 64 r0: 132. r1: 21. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 291, DECODE, PC: 64 r0: 132. r1: 21. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 292, LW_1, PC: 64 r0: 132. r1: 21. r2: 32. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21  
+DEBUG:root:TICK: 293, LW_2, PC: 64 r0: 132. r1: 21. r2: 1701667182. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 294, FETCH, PC: 68 r0: 132. r1: 21. r2: 1701667182. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 295, DECODE, PC: 68 r0: 132. r1: 21. r2: 1701667182. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 296, AND, PC: 68 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21  
+DEBUG:root:TICK: 297, FETCH, PC: 72 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 298, DECODE, PC: 72 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 299, J, PC: 48 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21    
+DEBUG:root:TICK: 300, FETCH, PC: 52 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 301, DECODE, PC: 52 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 302, BEQ, PC: 52 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21  
+DEBUG:root:TICK: 303, FETCH, PC: 56 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 304, DECODE, PC: 56 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 21
+DEBUG:root:TICK: 305, SW_1, PC: 56 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 110
+DEBUG:root:TICK: 306, SW_2, PC: 56 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 307, FETCH, PC: 60 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 308, DECODE, PC: 60 r0: 132. r1: 21. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 309, ADDI, PC: 60 r0: 132. r1: 22. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 310, FETCH, PC: 64 r0: 132. r1: 22. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 311, DECODE, PC: 64 r0: 132. r1: 22. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 312, LW_1, PC: 64 r0: 132. r1: 22. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22 
+DEBUG:root:TICK: 313, LW_2, PC: 64 r0: 132. r1: 22. r2: 1063611745. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 314, FETCH, PC: 68 r0: 132. r1: 22. r2: 1063611745. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 315, DECODE, PC: 68 r0: 132. r1: 22. r2: 1063611745. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 316, AND, PC: 68 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22   
+DEBUG:root:TICK: 317, FETCH, PC: 72 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22 
+DEBUG:root:TICK: 318, DECODE, PC: 72 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 319, J, PC: 48 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22     
+DEBUG:root:TICK: 320, FETCH, PC: 52 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22 
+DEBUG:root:TICK: 321, DECODE, PC: 52 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 322, BEQ, PC: 52 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22   
+DEBUG:root:TICK: 323, FETCH, PC: 56 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22 
+DEBUG:root:TICK: 324, DECODE, PC: 56 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 22
+DEBUG:root:TICK: 325, SW_1, PC: 56 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 97
+DEBUG:root:TICK: 326, SW_2, PC: 56 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 327, FETCH, PC: 60 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 328, DECODE, PC: 60 r0: 132. r1: 22. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 329, ADDI, PC: 60 r0: 132. r1: 23. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 330, FETCH, PC: 64 r0: 132. r1: 23. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 331, DECODE, PC: 64 r0: 132. r1: 23. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 332, LW_1, PC: 64 r0: 132. r1: 23. r2: 97. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23  
+DEBUG:root:TICK: 333, LW_2, PC: 64 r0: 132. r1: 23. r2: 1547658605. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 334, FETCH, PC: 68 r0: 132. r1: 23. r2: 1547658605. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 335, DECODE, PC: 68 r0: 132. r1: 23. r2: 1547658605. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 336, AND, PC: 68 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23  
+DEBUG:root:TICK: 337, FETCH, PC: 72 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 338, DECODE, PC: 72 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 339, J, PC: 48 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23    
+DEBUG:root:TICK: 340, FETCH, PC: 52 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 341, DECODE, PC: 52 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 342, BEQ, PC: 52 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23  
+DEBUG:root:TICK: 343, FETCH, PC: 56 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 344, DECODE, PC: 56 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 23
+DEBUG:root:TICK: 345, SW_1, PC: 56 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 109
+DEBUG:root:TICK: 346, SW_2, PC: 56 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 347, FETCH, PC: 60 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 348, DECODE, PC: 60 r0: 132. r1: 23. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 349, ADDI, PC: 60 r0: 132. r1: 24. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 350, FETCH, PC: 64 r0: 132. r1: 24. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 351, DECODE, PC: 64 r0: 132. r1: 24. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 352, LW_1, PC: 64 r0: 132. r1: 24. r2: 109. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24 
+DEBUG:root:TICK: 353, LW_2, PC: 64 r0: 132. r1: 24. r2: 1851539301. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 354, FETCH, PC: 68 r0: 132. r1: 24. r2: 1851539301. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 355, DECODE, PC: 68 r0: 132. r1: 24. r2: 1851539301. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 356, AND, PC: 68 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24  
+DEBUG:root:TICK: 357, FETCH, PC: 72 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 358, DECODE, PC: 72 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 359, J, PC: 48 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24    
+DEBUG:root:TICK: 360, FETCH, PC: 52 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 361, DECODE, PC: 52 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 362, BEQ, PC: 52 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24  
+DEBUG:root:TICK: 363, FETCH, PC: 56 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 364, DECODE, PC: 56 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 24
+DEBUG:root:TICK: 365, SW_1, PC: 56 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 101
+DEBUG:root:TICK: 366, SW_2, PC: 56 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 367, FETCH, PC: 60 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 368, DECODE, PC: 60 r0: 132. r1: 24. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 369, ADDI, PC: 60 r0: 132. r1: 25. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 370, FETCH, PC: 64 r0: 132. r1: 25. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 371, DECODE, PC: 64 r0: 132. r1: 25. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 372, LW_1, PC: 64 r0: 132. r1: 25. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25 
+DEBUG:root:TICK: 373, LW_2, PC: 64 r0: 132. r1: 25. r2: 1215192127. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 374, FETCH, PC: 68 r0: 132. r1: 25. r2: 1215192127. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 375, DECODE, PC: 68 r0: 132. r1: 25. r2: 1215192127. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 376, AND, PC: 68 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25   
+DEBUG:root:TICK: 377, FETCH, PC: 72 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25 
+DEBUG:root:TICK: 378, DECODE, PC: 72 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 379, J, PC: 48 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25     
+DEBUG:root:TICK: 380, FETCH, PC: 52 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25 
+DEBUG:root:TICK: 381, DECODE, PC: 52 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 382, BEQ, PC: 52 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25   
+DEBUG:root:TICK: 383, FETCH, PC: 56 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25 
+DEBUG:root:TICK: 384, DECODE, PC: 56 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 25
+DEBUG:root:TICK: 385, SW_1, PC: 56 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 63
+DEBUG:root:TICK: 386, SW_2, PC: 56 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 387, FETCH, PC: 60 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 388, DECODE, PC: 60 r0: 132. r1: 25. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 389, ADDI, PC: 60 r0: 132. r1: 26. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 390, FETCH, PC: 64 r0: 132. r1: 26. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 391, DECODE, PC: 64 r0: 132. r1: 26. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 392, LW_1, PC: 64 r0: 132. r1: 26. r2: 63. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26  
+DEBUG:root:TICK: 393, LW_2, PC: 64 r0: 132. r1: 26. r2: 1699245660. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 394, FETCH, PC: 68 r0: 132. r1: 26. r2: 1699245660. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 395, DECODE, PC: 68 r0: 132. r1: 26. r2: 1699245660. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 396, AND, PC: 68 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26   
+DEBUG:root:TICK: 397, FETCH, PC: 72 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26 
+DEBUG:root:TICK: 398, DECODE, PC: 72 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 399, J, PC: 48 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26     
+DEBUG:root:TICK: 400, FETCH, PC: 52 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26 
+DEBUG:root:TICK: 401, DECODE, PC: 52 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 402, BEQ, PC: 52 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26   
+DEBUG:root:TICK: 403, FETCH, PC: 56 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26 
+DEBUG:root:TICK: 404, DECODE, PC: 56 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 26
+DEBUG:root:TICK: 405, SW_1, PC: 56 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 92
+DEBUG:root:TICK: 406, SW_2, PC: 56 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 407, FETCH, PC: 60 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 408, DECODE, PC: 60 r0: 132. r1: 26. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 409, ADDI, PC: 60 r0: 132. r1: 27. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 410, FETCH, PC: 64 r0: 132. r1: 27. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 411, DECODE, PC: 64 r0: 132. r1: 27. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 412, LW_1, PC: 64 r0: 132. r1: 27. r2: 92. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27  
+DEBUG:root:TICK: 413, LW_2, PC: 64 r0: 132. r1: 27. r2: 1818577006. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 414, FETCH, PC: 68 r0: 132. r1: 27. r2: 1818577006. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 415, DECODE, PC: 68 r0: 132. r1: 27. r2: 1818577006. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 416, AND, PC: 68 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27  
+DEBUG:root:TICK: 417, FETCH, PC: 72 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 418, DECODE, PC: 72 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 419, J, PC: 48 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27    
+DEBUG:root:TICK: 420, FETCH, PC: 52 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 421, DECODE, PC: 52 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 422, BEQ, PC: 52 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27  
+DEBUG:root:TICK: 423, FETCH, PC: 56 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 424, DECODE, PC: 56 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 27
+DEBUG:root:TICK: 425, SW_1, PC: 56 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 110
+DEBUG:root:TICK: 426, SW_2, PC: 56 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 427, FETCH, PC: 60 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 428, DECODE, PC: 60 r0: 132. r1: 27. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 429, ADDI, PC: 60 r0: 132. r1: 28. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 430, FETCH, PC: 64 r0: 132. r1: 28. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 431, DECODE, PC: 64 r0: 132. r1: 28. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 432, LW_1, PC: 64 r0: 132. r1: 28. r2: 110. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28 
+DEBUG:root:TICK: 433, LW_2, PC: 64 r0: 132. r1: 28. r2: 1819043144. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 434, FETCH, PC: 68 r0: 132. r1: 28. r2: 1819043144. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 435, DECODE, PC: 68 r0: 132. r1: 28. r2: 1819043144. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 436, AND, PC: 68 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28   
+DEBUG:root:TICK: 437, FETCH, PC: 72 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28 
+DEBUG:root:TICK: 438, DECODE, PC: 72 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 439, J, PC: 48 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28     
+DEBUG:root:TICK: 440, FETCH, PC: 52 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28 
+DEBUG:root:TICK: 441, DECODE, PC: 52 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 442, BEQ, PC: 52 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28   
+DEBUG:root:TICK: 443, FETCH, PC: 56 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28 
+DEBUG:root:TICK: 444, DECODE, PC: 56 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 28
+DEBUG:root:TICK: 445, SW_1, PC: 56 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 72
+DEBUG:root:TICK: 446, SW_2, PC: 56 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 447, FETCH, PC: 60 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 448, DECODE, PC: 60 r0: 132. r1: 28. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 449, ADDI, PC: 60 r0: 132. r1: 29. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 450, FETCH, PC: 64 r0: 132. r1: 29. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 451, DECODE, PC: 64 r0: 132. r1: 29. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 452, LW_1, PC: 64 r0: 132. r1: 29. r2: 72. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29  
+DEBUG:root:TICK: 453, LW_2, PC: 64 r0: 132. r1: 29. r2: 1869376613. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 454, FETCH, PC: 68 r0: 132. r1: 29. r2: 1869376613. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 455, DECODE, PC: 68 r0: 132. r1: 29. r2: 1869376613. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 456, AND, PC: 68 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29  
+DEBUG:root:TICK: 457, FETCH, PC: 72 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 458, DECODE, PC: 72 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 459, J, PC: 48 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29    
+DEBUG:root:TICK: 460, FETCH, PC: 52 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 461, DECODE, PC: 52 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 462, BEQ, PC: 52 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29  
+DEBUG:root:TICK: 463, FETCH, PC: 56 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 464, DECODE, PC: 56 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 29
+DEBUG:root:TICK: 465, SW_1, PC: 56 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 101
+DEBUG:root:TICK: 466, SW_2, PC: 56 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 467, FETCH, PC: 60 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 468, DECODE, PC: 60 r0: 132. r1: 29. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 469, ADDI, PC: 60 r0: 132. r1: 30. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 470, FETCH, PC: 64 r0: 132. r1: 30. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 471, DECODE, PC: 64 r0: 132. r1: 30. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 472, LW_1, PC: 64 r0: 132. r1: 30. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30 
+DEBUG:root:TICK: 473, LW_2, PC: 64 r0: 132. r1: 30. r2: 745499756. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 474, FETCH, PC: 68 r0: 132. r1: 30. r2: 745499756. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 475, DECODE, PC: 68 r0: 132. r1: 30. r2: 745499756. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 476, AND, PC: 68 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30  
+DEBUG:root:TICK: 477, FETCH, PC: 72 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 478, DECODE, PC: 72 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 479, J, PC: 48 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30    
+DEBUG:root:TICK: 480, FETCH, PC: 52 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 481, DECODE, PC: 52 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 482, BEQ, PC: 52 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30  
+DEBUG:root:TICK: 483, FETCH, PC: 56 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 484, DECODE, PC: 56 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 30
+DEBUG:root:TICK: 485, SW_1, PC: 56 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 108
+DEBUG:root:TICK: 486, SW_2, PC: 56 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 487, FETCH, PC: 60 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 488, DECODE, PC: 60 r0: 132. r1: 30. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 489, ADDI, PC: 60 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 490, FETCH, PC: 64 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 491, DECODE, PC: 64 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 492, LW_1, PC: 64 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31 
+DEBUG:root:TICK: 493, LW_2, PC: 64 r0: 132. r1: 31. r2: 2912108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 494, FETCH, PC: 68 r0: 132. r1: 31. r2: 2912108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 495, DECODE, PC: 68 r0: 132. r1: 31. r2: 2912108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 496, AND, PC: 68 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31  
+DEBUG:root:TICK: 497, FETCH, PC: 72 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 498, DECODE, PC: 72 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 499, J, PC: 48 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31    
+DEBUG:root:TICK: 500, FETCH, PC: 52 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 501, DECODE, PC: 52 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 502, BEQ, PC: 52 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31  
+DEBUG:root:TICK: 503, FETCH, PC: 56 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 504, DECODE, PC: 56 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 31
+DEBUG:root:TICK: 505, SW_1, PC: 56 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 108
+DEBUG:root:TICK: 506, SW_2, PC: 56 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 507, FETCH, PC: 60 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 508, DECODE, PC: 60 r0: 132. r1: 31. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 509, ADDI, PC: 60 r0: 132. r1: 32. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 510, FETCH, PC: 64 r0: 132. r1: 32. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 511, DECODE, PC: 64 r0: 132. r1: 32. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 512, LW_1, PC: 64 r0: 132. r1: 32. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32 
+DEBUG:root:TICK: 513, LW_2, PC: 64 r0: 132. r1: 32. r2: 553659503. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 514, FETCH, PC: 68 r0: 132. r1: 32. r2: 553659503. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 515, DECODE, PC: 68 r0: 132. r1: 32. r2: 553659503. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 516, AND, PC: 68 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32  
+DEBUG:root:TICK: 517, FETCH, PC: 72 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 518, DECODE, PC: 72 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 519, J, PC: 48 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32    
+DEBUG:root:TICK: 520, FETCH, PC: 52 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 521, DECODE, PC: 52 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 522, BEQ, PC: 52 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32  
+DEBUG:root:TICK: 523, FETCH, PC: 56 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 524, DECODE, PC: 56 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 32
+DEBUG:root:TICK: 525, SW_1, PC: 56 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 111
+DEBUG:root:TICK: 526, SW_2, PC: 56 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 527, FETCH, PC: 60 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 528, DECODE, PC: 60 r0: 132. r1: 32. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 529, ADDI, PC: 60 r0: 132. r1: 33. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 530, FETCH, PC: 64 r0: 132. r1: 33. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 531, DECODE, PC: 64 r0: 132. r1: 33. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 532, LW_1, PC: 64 r0: 132. r1: 33. r2: 111. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33 
+DEBUG:root:TICK: 533, LW_2, PC: 64 r0: 132. r1: 33. r2: 2162732. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 534, FETCH, PC: 68 r0: 132. r1: 33. r2: 2162732. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 535, DECODE, PC: 68 r0: 132. r1: 33. r2: 2162732. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 536, AND, PC: 68 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33   
+DEBUG:root:TICK: 537, FETCH, PC: 72 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33 
+DEBUG:root:TICK: 538, DECODE, PC: 72 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 539, J, PC: 48 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33     
+DEBUG:root:TICK: 540, FETCH, PC: 52 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33 
+DEBUG:root:TICK: 541, DECODE, PC: 52 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 542, BEQ, PC: 52 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33   
+DEBUG:root:TICK: 543, FETCH, PC: 56 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33 
+DEBUG:root:TICK: 544, DECODE, PC: 56 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 33
+DEBUG:root:TICK: 545, SW_1, PC: 56 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 44
+DEBUG:root:TICK: 546, SW_2, PC: 56 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 547, FETCH, PC: 60 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 548, DECODE, PC: 60 r0: 132. r1: 33. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 549, ADDI, PC: 60 r0: 132. r1: 34. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 550, FETCH, PC: 64 r0: 132. r1: 34. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 551, DECODE, PC: 64 r0: 132. r1: 34. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 552, LW_1, PC: 64 r0: 132. r1: 34. r2: 44. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34  
+DEBUG:root:TICK: 553, LW_2, PC: 64 r0: 132. r1: 34. r2: 8448. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34
+DEBUG:root:TICK: 554, FETCH, PC: 68 r0: 132. r1: 34. r2: 8448. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34
+DEBUG:root:TICK: 555, DECODE, PC: 68 r0: 132. r1: 34. r2: 8448. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34
+DEBUG:root:TICK: 556, AND, PC: 68 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34    
+DEBUG:root:TICK: 557, FETCH, PC: 72 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34  
+DEBUG:root:TICK: 558, DECODE, PC: 72 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34 
+DEBUG:root:TICK: 559, J, PC: 48 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34      
+DEBUG:root:TICK: 560, FETCH, PC: 52 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34  
+DEBUG:root:TICK: 561, DECODE, PC: 52 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34 
+DEBUG:root:TICK: 562, BEQ, PC: 72 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34    
+DEBUG:root:TICK: 563, FETCH, PC: 76 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34  
+DEBUG:root:TICK: 564, DECODE, PC: 76 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 34 
+DEBUG:root:TICK: 565, LW_1, PC: 76 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:Input >> 65
+DEBUG:root:TICK: 566, LW_2, PC: 76 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 567, FETCH, PC: 80 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 568, DECODE, PC: 80 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 569, BEQ, PC: 80 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:TICK: 570, FETCH, PC: 84 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 571, DECODE, PC: 84 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 572, SW_1, PC: 84 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 65
+DEBUG:root:TICK: 573, SW_2, PC: 84 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 574, FETCH, PC: 88 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 575, DECODE, PC: 88 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 576, J, PC: 72 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132    
+DEBUG:root:TICK: 577, FETCH, PC: 76 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 578, DECODE, PC: 76 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 579, LW_1, PC: 76 r0: 132. r1: 34. r2: 65. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:Input >> 108
+DEBUG:root:TICK: 580, LW_2, PC: 76 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 581, FETCH, PC: 80 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 582, DECODE, PC: 80 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 583, BEQ, PC: 80 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 584, FETCH, PC: 84 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 585, DECODE, PC: 84 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 586, SW_1, PC: 84 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 108
+DEBUG:root:TICK: 587, SW_2, PC: 84 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 588, FETCH, PC: 88 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 589, DECODE, PC: 88 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 590, J, PC: 72 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:TICK: 591, FETCH, PC: 76 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 592, DECODE, PC: 76 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 593, LW_1, PC: 76 r0: 132. r1: 34. r2: 108. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:Input >> 105
+DEBUG:root:TICK: 594, LW_2, PC: 76 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 595, FETCH, PC: 80 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 596, DECODE, PC: 80 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 597, BEQ, PC: 80 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 598, FETCH, PC: 84 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 599, DECODE, PC: 84 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 600, SW_1, PC: 84 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 105
+DEBUG:root:TICK: 601, SW_2, PC: 84 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 602, FETCH, PC: 88 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 603, DECODE, PC: 88 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 604, J, PC: 72 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:TICK: 605, FETCH, PC: 76 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 606, DECODE, PC: 76 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 607, LW_1, PC: 76 r0: 132. r1: 34. r2: 105. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:Input >> 99
+DEBUG:root:TICK: 608, LW_2, PC: 76 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 609, FETCH, PC: 80 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 610, DECODE, PC: 80 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 611, BEQ, PC: 80 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:TICK: 612, FETCH, PC: 84 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 613, DECODE, PC: 84 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 614, SW_1, PC: 84 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 99
+DEBUG:root:TICK: 615, SW_2, PC: 84 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 616, FETCH, PC: 88 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 617, DECODE, PC: 88 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 618, J, PC: 72 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132    
+DEBUG:root:TICK: 619, FETCH, PC: 76 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 620, DECODE, PC: 76 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 621, LW_1, PC: 76 r0: 132. r1: 34. r2: 99. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:Input >> 101
+DEBUG:root:TICK: 622, LW_2, PC: 76 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 623, FETCH, PC: 80 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 624, DECODE, PC: 80 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 625, BEQ, PC: 80 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 626, FETCH, PC: 84 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 627, DECODE, PC: 84 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 628, SW_1, PC: 84 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 101
+DEBUG:root:TICK: 629, SW_2, PC: 84 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 630, FETCH, PC: 88 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 631, DECODE, PC: 88 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 632, J, PC: 72 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132   
+DEBUG:root:TICK: 633, FETCH, PC: 76 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 634, DECODE, PC: 76 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 635, LW_1, PC: 76 r0: 132. r1: 34. r2: 101. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:Input >> 0
+DEBUG:root:TICK: 636, LW_2, PC: 76 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:TICK: 637, FETCH, PC: 80 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 638, DECODE, PC: 80 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 639, BEQ, PC: 88 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128   
+DEBUG:root:TICK: 640, FETCH, PC: 92 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 641, DECODE, PC: 92 r0: 132. r1: 34. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 642, LUI, PC: 92 r0: 132. r1: 0. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128    
+DEBUG:root:TICK: 643, FETCH, PC: 96 r0: 132. r1: 0. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:TICK: 644, DECODE, PC: 96 r0: 132. r1: 0. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128 
+DEBUG:root:TICK: 645, ADDI, PC: 96 r0: 132. r1: 35. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128  
+DEBUG:root:TICK: 646, FETCH, PC: 100 r0: 132. r1: 35. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 647, DECODE, PC: 100 r0: 132. r1: 35. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 128
+DEBUG:root:TICK: 648, LW_1, PC: 100 r0: 132. r1: 35. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35  
+DEBUG:root:TICK: 649, LW_2, PC: 100 r0: 132. r1: 35. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35 
+DEBUG:root:TICK: 650, FETCH, PC: 104 r0: 132. r1: 35. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 651, DECODE, PC: 104 r0: 132. r1: 35. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 652, ADDI, PC: 104 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35 
+DEBUG:root:TICK: 653, FETCH, PC: 108 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 654, DECODE, PC: 108 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 655, AND, PC: 108 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35  
+DEBUG:root:TICK: 656, FETCH, PC: 112 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 657, DECODE, PC: 112 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 658, BEQ, PC: 112 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35  
+DEBUG:root:TICK: 659, FETCH, PC: 116 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 660, DECODE, PC: 116 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 35
+DEBUG:root:TICK: 661, SW_1, PC: 116 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:Output << 33
+DEBUG:root:TICK: 662, SW_2, PC: 116 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 663, FETCH, PC: 120 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 664, DECODE, PC: 120 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 665, J, PC: 96 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132    
+DEBUG:root:TICK: 666, FETCH, PC: 100 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 667, DECODE, PC: 100 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 668, LW_1, PC: 100 r0: 132. r1: 36. r2: 33. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36 
+DEBUG:root:TICK: 669, LW_2, PC: 100 r0: 132. r1: 36. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36  
+DEBUG:root:TICK: 670, FETCH, PC: 104 r0: 132. r1: 36. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36 
+DEBUG:root:TICK: 671, DECODE, PC: 104 r0: 132. r1: 36. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36
+DEBUG:root:TICK: 672, ADDI, PC: 104 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36  
+DEBUG:root:TICK: 673, FETCH, PC: 108 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36 
+DEBUG:root:TICK: 674, DECODE, PC: 108 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36
+DEBUG:root:TICK: 675, AND, PC: 108 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36   
+DEBUG:root:TICK: 676, FETCH, PC: 112 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36 
+DEBUG:root:TICK: 677, DECODE, PC: 112 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36
+DEBUG:root:TICK: 678, BEQ, PC: 120 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36   
+DEBUG:root:TICK: 679, FETCH, PC: 124 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36 
+DEBUG:root:TICK: 680, DECODE, PC: 124 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 36
+DEBUG:root:TICK: 681, SW_1, PC: 124 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:Output << 0
+DEBUG:root:TICK: 682, SW_2, PC: 124 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+DEBUG:root:TICK: 683, FETCH, PC: 128 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 684, DECODE, PC: 128 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132
+DEBUG:root:TICK: 685, HALT, PC: 128 r0: 132. r1: 37. r2: 0. r3: 255. r4: 128. r5: 0, r6: 0, sp: 0, ar: 132 
+[87, 104, 97, 116, 32, 105, 115, 32, 121, 111, 117, 114, 32, 110, 97, 109, 101, 63, 92, 110, 72, 101, 108, 108, 111, 44, 65, 108, 105, 99, 101, 33, 0]
+What is your name?\nHello,Alice
+```
